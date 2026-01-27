@@ -7,6 +7,8 @@ public class HealthSystem : MonoBehaviour
     [SerializeField] float health = 100;
     [SerializeField] GameObject hitVFX;
     [SerializeField] GameObject ragdoll;
+
+    private bool isInvincible = false;
  
     Animator animator;
     void Start()
@@ -14,8 +16,23 @@ public class HealthSystem : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
+    public void SetInvincible(bool invincible)
+    {
+        isInvincible = invincible;
+        Debug.Log($"HealthSystem: Invincibility set to {invincible}");
+    }
+
+    public bool IsInvincible => isInvincible;
+
     public void TakeDamage(float damageAmount)
     {
+        // Don't take damage if invincible
+        if (isInvincible)
+        {
+            Debug.Log("HealthSystem: Damage blocked - player is invincible");
+            return;
+        }
+
         health -= damageAmount;
         animator.SetTrigger("damage");
         //CameraShake.Instance.ShakeCamera(2f, 0.2f);

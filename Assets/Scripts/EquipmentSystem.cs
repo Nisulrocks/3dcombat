@@ -12,6 +12,9 @@ public class EquipmentSystem : MonoBehaviour
  
     GameObject currentWeaponInHand;
     GameObject currentWeaponInSheath;
+
+    public GameObject CurrentWeapon => currentWeaponInHand;
+
     void Start()
     {
         currentWeaponInSheath = Instantiate(weapon, weaponSheath.transform);
@@ -21,6 +24,12 @@ public class EquipmentSystem : MonoBehaviour
     {
         currentWeaponInHand = Instantiate(weapon, weaponHolder.transform);
         Destroy(currentWeaponInSheath);
+
+        // Refresh sword fire VFX if super is active
+        if (SuperSystem.Instance != null)
+        {
+            SuperSystem.Instance.RefreshSwordFire();
+        }
     }
  
     public void SheathWeapon()

@@ -8,10 +8,11 @@ public class CombatState : State
     float playerSpeed;
     bool attack;
     bool block;
+    bool superActivate;
     float timePassed;
- 
+
     Vector3 cVelocity;
- 
+
     public CombatState(Character _character, StateMachine _stateMachine) : base(_character, _stateMachine)
     {
         character = _character;
@@ -28,6 +29,7 @@ public class CombatState : State
         gravityVelocity.y = 0;
         attack = false;
         block = false;
+        superActivate = false;
         timePassed = 0f;
 
         velocity = character.playerVelocity;
@@ -53,6 +55,11 @@ public class CombatState : State
         if (blockAction.triggered)
         {
             block = true;
+        }
+
+        if (superAction.triggered)
+        {
+            superActivate = true;
         }
 
         input = moveAction.ReadValue<Vector2>();
@@ -91,6 +98,14 @@ public class CombatState : State
                 attack = false;
                 return;
             }
+
+            // Check if super is active - trigger super attack instead
+            if (SuperSystem.Instance != null && SuperSystem.Instance.IsSuperActive)
+            {
+                stateMachine.ChangeState(character.superAttacking);
+                attack = false;
+                return;
+            }
             
             character.animator.SetTrigger("attack");
             stateMachine.ChangeState(character.attacking);
@@ -107,6 +122,17 @@ public class CombatState : State
                 // The animation will handle showing/hiding the shield
             }
             block = false; // Reset block flag
+        }
+
+        // Handle super activation
+        if (superActivate)
+        {
+            if (SuperSystem.Instance != null && SuperSystem.Instance.IsSuperReady)
+            {
+                // Activate super mode
+                SuperSystem.Instance.TryActivateSuper();
+            }
+            superActivate = false;
         }
         
         timePassed += Time.deltaTime;

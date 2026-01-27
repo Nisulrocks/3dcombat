@@ -150,9 +150,10 @@ public class ComboManager : MonoBehaviour
         float elapsed = 0f;
         
         // Update slider progress during combo window
+        // Use unscaledDeltaTime so time slow doesn't affect the combo window
         while (elapsed < animationDuration && comboWindowActive)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             float progress = 1f - (elapsed / animationDuration);
             OnComboWindowChanged?.Invoke(progress);
             yield return null;
@@ -160,6 +161,7 @@ public class ComboManager : MonoBehaviour
         
         // Always reset combo window flag when coroutine ends
         comboWindowActive = false;
+        comboResetCoroutine = null;
         
         // If no next hit was registered, reset combo
         if (currentCombo > 0)

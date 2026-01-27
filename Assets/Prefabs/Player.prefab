@@ -781,6 +781,8 @@ GameObject:
   - component: {fileID: 2357002299083401103}
   - component: {fileID: 2065984783274479992}
   - component: {fileID: 5783649677598550629}
+  - component: {fileID: -4470690274559867477}
+  - component: {fileID: 2968931435609223017}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -929,8 +931,7 @@ MonoBehaviour:
   weaponHolder: {fileID: 3814441937589667978}
   weapon: {fileID: 966264125702892200, guid: 426f034d4d25db440b4fe4fd196f7c14, type: 3}
   weaponSheath: {fileID: 6721366488696480463}
-  shieldHolder: {fileID: 554821896235557654}
-  shieldPrefab: {fileID: 1799019779132808453, guid: 1e540d660e5117e4b8c65668bb0b9a8d, type: 3}
+  shieldSystem: {fileID: -4470690274559867477}
 --- !u!114 &5783649677598550629
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -946,6 +947,44 @@ MonoBehaviour:
   health: 100
   hitVFX: {fileID: 1000012909287652, guid: abb9f519b142e304d9c45b56afa768bc, type: 3}
   ragdoll: {fileID: 0}
+--- !u!114 &-4470690274559867477
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2067702667595745650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5f6df3201f2037498224e96de6f1dc4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShieldSystem
+  shieldHolder: {fileID: 554821896235557654}
+  shieldPrefab: {fileID: 1799019779132808453, guid: 1e540d660e5117e4b8c65668bb0b9a8d, type: 3}
+  shieldDuration: 3
+  shieldCooldown: 3
+--- !u!114 &2968931435609223017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2067702667595745650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d135afc45fcff074696c0744b7d83180, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SuperSystem
+  maxSuperCharge: 20
+  chargePerHit: 10
+  superDamageMultiplier: 3
+  radiusDamageMultiplier: 5
+  radiusDamageRange: 5
+  initialPushBackForce: 5
+  radiusPushBackForce: 15
+  radiusDamageVFX: {fileID: 9080140021571130472, guid: 82066d902ed0dd6488ddfd32eb994801, type: 3}
+  swordFireParticle: {fileID: 1260262680682125493, guid: 366377810aaf4fc4ab2be725a54c5712, type: 3}
+  timeSlowScale: 0.1
 --- !u!1 &2136788266722871930
 GameObject:
   m_ObjectHideFlags: 0

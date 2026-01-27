@@ -18,6 +18,7 @@ public class State
     public InputAction drawWeaponAction;
     public InputAction attackAction;
     public InputAction blockAction;
+    public InputAction superAction;
  
     public State(Character _character, StateMachine _stateMachine)
     {
@@ -32,6 +33,7 @@ public class State
         drawWeaponAction = character.playerInput.actions["DrawWeapon"];
         attackAction = character.playerInput.actions["Attack"];
         blockAction = character.playerInput.actions["Block"];
+        superAction = character.playerInput.actions["Super"];
  
     }
  

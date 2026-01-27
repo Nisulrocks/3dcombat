@@ -26,6 +26,9 @@ public class ComboUI : MonoBehaviour
     [Header("Animation")]
     [SerializeField] AnimationCurve popupCurve;
     [SerializeField] AnimationCurve shakeCurve;
+
+    [Header("Auto Hide")]
+    [SerializeField] float maxVisibleDuration = 5f;
     
     private CanvasGroup canvasGroup;
     private Vector3 originalScale;
@@ -35,6 +38,9 @@ public class ComboUI : MonoBehaviour
     private Coroutine currentSliderCoroutine;
     private Coroutine hideCoroutine;
     private Coroutine positionCoroutine;
+    private Coroutine fadeOutCoroutine;
+    private float visibleTimer = 0f;
+    private bool isVisible = false;
     
     private void Awake()
     {
@@ -58,6 +64,52 @@ public class ComboUI : MonoBehaviour
             ComboManager.Instance.OnComboChanged += UpdateComboDisplay;
             ComboManager.Instance.OnComboWindowChanged += UpdateComboSlider;
         }
+
+        // Subscribe to super events if SuperSystem exists
+        if (SuperSystem.Instance != null)
+        {
+            SuperSystem.Instance.OnSuperActivated += ShowSuperActive;
+            SuperSystem.Instance.OnSuperEnded += HideSuperActive;
+        }
+    }
+
+    private void Update()
+    {
+        // Track visibility and auto-fade after max duration
+        if (canvasGroup.alpha > 0.01f)
+        {
+            if (!isVisible)
+            {
+                isVisible = true;
+                visibleTimer = 0f;
+            }
+            
+            visibleTimer += Time.unscaledDeltaTime;
+            
+            // Auto-fade if visible for too long and not in active combo
+            if (visibleTimer >= maxVisibleDuration)
+            {
+                bool inActiveCombo = ComboManager.Instance != null && 
+                                     ComboManager.Instance.GetCurrentCombo() > 0 && 
+                                     ComboManager.Instance.IsComboWindowActive();
+                
+                bool superActive = SuperSystem.Instance != null && SuperSystem.Instance.IsSuperActive;
+                
+                // Only auto-fade if not in active combo and super is not active
+                if (!inActiveCombo && !superActive)
+                {
+                    if (fadeOutCoroutine != null)
+                        StopCoroutine(fadeOutCoroutine);
+                    fadeOutCoroutine = StartCoroutine(FadeOut());
+                    visibleTimer = 0f;
+                }
+            }
+        }
+        else
+        {
+            isVisible = false;
+            visibleTimer = 0f;
+        }
     }
     
     private void OnDestroy()
@@ -67,6 +119,44 @@ public class ComboUI : MonoBehaviour
             ComboManager.Instance.OnComboChanged -= UpdateComboDisplay;
             ComboManager.Instance.OnComboWindowChanged -= UpdateComboSlider;
         }
+
+        if (SuperSystem.Instance != null)
+        {
+            SuperSystem.Instance.OnSuperActivated -= ShowSuperActive;
+            SuperSystem.Instance.OnSuperEnded -= HideSuperActive;
+        }
+    }
+
+    private void ShowSuperActive()
+    {
+        // Cancel any existing coroutines
+        if (hideCoroutine != null)
+            StopCoroutine(hideCoroutine);
+        if (positionCoroutine != null)
+            StopCoroutine(positionCoroutine);
+        if (currentPopupCoroutine != null)
+            StopCoroutine(currentPopupCoroutine);
+
+        // Show SUPER! text
+        comboText.text = "SUPER!";
+        multiplierText.text = "ACTIVE";
+        
+        // Set super color (orange/red)
+        Color superColor = new Color(1f, 0.5f, 0f);
+        comboText.color = superColor;
+        multiplierText.color = superColor;
+
+        // Generate random position
+        GenerateRandomPositionAndRotation();
+        positionCoroutine = StartCoroutine(MoveToPosition());
+        currentPopupCoroutine = StartCoroutine(PopupAnimation());
+    }
+
+    private void HideSuperActive()
+    {
+        if (fadeOutCoroutine != null)
+            StopCoroutine(fadeOutCoroutine);
+        fadeOutCoroutine = StartCoroutine(FadeOut());
     }
     
     public void UpdateComboDisplay(int comboCount, float multiplier)
@@ -74,7 +164,9 @@ public class ComboUI : MonoBehaviour
         if (comboCount == 0)
         {
             // Combo reset - fade out immediately
-            StartCoroutine(FadeOut());
+            if (fadeOutCoroutine != null)
+                StopCoroutine(fadeOutCoroutine);
+            fadeOutCoroutine = StartCoroutine(FadeOut());
             return;
         }
         
@@ -85,6 +177,11 @@ public class ComboUI : MonoBehaviour
             StopCoroutine(positionCoroutine);
         if (currentPopupCoroutine != null)
             StopCoroutine(currentPopupCoroutine);
+        if (fadeOutCoroutine != null)
+            StopCoroutine(fadeOutCoroutine);
+        
+        // Reset visible timer when combo is refreshed
+        visibleTimer = 0f;
         
         // Generate new random position and rotation for each combo
         GenerateRandomPositionAndRotation();
@@ -135,7 +232,9 @@ public class ComboUI : MonoBehaviour
             // Check if combo count is 0 (combo reset) or if we're just ending the window
             if (ComboManager.Instance != null && ComboManager.Instance.GetCurrentCombo() == 0)
             {
-                StartCoroutine(FadeOut());
+                if (fadeOutCoroutine != null)
+                    StopCoroutine(fadeOutCoroutine);
+                fadeOutCoroutine = StartCoroutine(FadeOut());
             }
             return;
         }
@@ -252,9 +351,10 @@ public class ComboUI : MonoBehaviour
         float elapsed = 0f;
         float startAlpha = canvasGroup.alpha;
         
+        // Use unscaledDeltaTime so time slow doesn't affect fade
         while (elapsed < 1f / fadeSpeed)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             float t = elapsed * fadeSpeed;
             canvasGroup.alpha = Mathf.Lerp(startAlpha, 0f, t);
             yield return null;
@@ -263,5 +363,7 @@ public class ComboUI : MonoBehaviour
         canvasGroup.alpha = 0f;
         if (comboSlider != null)
             comboSlider.value = 0f;
+        
+        fadeOutCoroutine = null;
     }
 }

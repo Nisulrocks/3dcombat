@@ -8,17 +8,20 @@ public class EnemyHealthBarSpawner : MonoBehaviour
     [SerializeField] Transform followTarget;
 
     private EnemyHealthBar spawned;
-    private static HashSet<Enemy> trackedEnemies = new HashSet<Enemy>();
+    private static HashSet<int> trackedEnemyIDs = new HashSet<int>();
+    private bool hasSpawned = false;
 
     private void Start()
     {
         Enemy enemy = GetComponent<Enemy>();
         if (enemy == null) return;
 
+        int enemyID = enemy.GetInstanceID();
+
         // Prevent multiple health bars for the same enemy
-        if (trackedEnemies.Contains(enemy))
+        if (trackedEnemyIDs.Contains(enemyID) || hasSpawned)
         {
-            Debug.LogWarning("EnemyHealthBarSpawner: Enemy already has a health bar", this);
+            Debug.LogWarning($"EnemyHealthBarSpawner: Enemy {enemyID} already has a health bar", this);
             return;
         }
 
@@ -52,7 +55,10 @@ public class EnemyHealthBarSpawner : MonoBehaviour
             : Instantiate(healthBarPrefab);
 
         spawned.Bind(enemy, followTarget);
-        trackedEnemies.Add(enemy);
+        trackedEnemyIDs.Add(enemyID);
+        hasSpawned = true;
+        
+        Debug.Log($"EnemyHealthBarSpawner: Spawned health bar for enemy {enemyID}");
     }
 
     private void OnDestroy()
@@ -67,7 +73,14 @@ public class EnemyHealthBarSpawner : MonoBehaviour
         Enemy enemy = GetComponent<Enemy>();
         if (enemy != null)
         {
-            trackedEnemies.Remove(enemy);
+            trackedEnemyIDs.Remove(enemy.GetInstanceID());
         }
+    }
+
+    // Clear static data when scene loads (prevents issues across scene loads)
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ClearStaticData()
+    {
+        trackedEnemyIDs.Clear();
     }
 }

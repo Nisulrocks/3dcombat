@@ -17,6 +17,7 @@ public class DamageText : MonoBehaviour
     [Header("Visual Effects")]
     [SerializeField] Color[] damageColors = {Color.white, Color.yellow, Color.orange, Color.red};
     [SerializeField] Color blockedColor = Color.cyan; // Color for "BLOCKED" text
+    [SerializeField] Color superColor = new Color(1f, 0.5f, 0f); // Orange color for "SUPER!" text
     [SerializeField] float popupScaleMultiplier = 1.2f; // Much smaller scale
     [SerializeField] AnimationCurve popupCurve;
     
@@ -40,6 +41,21 @@ public class DamageText : MonoBehaviour
         DamageText damageText = pool.GetDamageText();
         damageText.transform.position = position;
         damageText.Setup(damage, comboLevel);
+    }
+
+    public static void CreateSuperDamageText(Vector3 position, float damage)
+    {
+        // Find or create damage text pool
+        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        if (pool == null)
+        {
+            GameObject poolObj = new GameObject("DamageTextPool");
+            pool = poolObj.AddComponent<DamageTextPool>();
+        }
+        
+        DamageText damageText = pool.GetDamageText();
+        damageText.transform.position = position;
+        damageText.SetupSuper(damage);
     }
     
     public void Setup(float damage, int comboLevel)
@@ -98,6 +114,49 @@ public class DamageText : MonoBehaviour
         StartCoroutine(LifetimeCoroutine());
         
         Debug.Log("DamageText setup complete - animations started");
+    }
+
+    public void SetupSuper(float damage)
+    {
+        Debug.Log($"DamageText.SetupSuper called - Damage: {damage}");
+        
+        // Store original scale on first setup
+        if (originalScale == Vector3.zero)
+            originalScale = transform.localScale;
+        
+        if (textMesh == null)
+        {
+            Debug.LogError("TextMeshPro component not assigned!");
+            ReturnToPool();
+            return;
+        }
+        
+        // Set SUPER! text with damage
+        textMesh.text = $"SUPER!\n{damage:F0}";
+        textMesh.color = superColor;
+        
+        // Reset values
+        timeAlive = 0f;
+        isFading = false;
+        velocity = Vector3.zero;
+        
+        // Add random horizontal force
+        Vector3 randomHorizontal = new Vector3(
+            Random.Range(-randomHorizontalRange, randomHorizontalRange),
+            0,
+            Random.Range(-randomHorizontalRange, randomHorizontalRange)
+        );
+        
+        // Apply forces
+        velocity = Vector3.up * upwardForce + randomHorizontal;
+        
+        // Start popup animation
+        StartCoroutine(PopupAnimation());
+        
+        // Start lifetime
+        StartCoroutine(LifetimeCoroutine());
+        
+        Debug.Log("DamageText SUPER setup complete");
     }
     
     private IEnumerator PopupAnimation()

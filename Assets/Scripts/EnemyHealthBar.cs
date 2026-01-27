@@ -45,12 +45,18 @@ public class EnemyHealthBar : MonoBehaviour
 
     private void HandleHealthChanged(float current, float max)
     {
-        if (slider == null) return;
+        if (slider == null || enemy == null) return;
+
+        // Validate that the values match what the enemy actually has
+        // This prevents stale event data from affecting the health bar
+        if (Mathf.Abs(current - enemy.CurrentHealth) > 0.01f || Mathf.Abs(max - enemy.MaxHealth) > 0.01f)
+        {
+            Debug.LogWarning($"EnemyHealthBar: Received stale health data. Event: {current}/{max}, Actual: {enemy.CurrentHealth}/{enemy.MaxHealth}");
+            current = enemy.CurrentHealth;
+            max = enemy.MaxHealth;
+        }
 
         float normalized = max <= 0f ? 0f : current / max;
-        
-        // Debug log to track health changes
-        Debug.Log($"EnemyHealthBar: Health changed - Current: {current:F1}, Max: {max:F1}, Normalized: {normalized:F2}");
         
         slider.value = normalized;
 
