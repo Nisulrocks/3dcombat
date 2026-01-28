@@ -55,7 +55,10 @@ public class Character : MonoBehaviour
         animator = GetComponent<Animator>();
         playerInput = GetComponent<PlayerInput>();
         cameraTransform = Camera.main.transform;
- 
+
+        // Lock cursor to game window
+        LockCursor();
+
         movementSM = new StateMachine();
         standing = new StandingState(this, movementSM);
         jumping = new JumpingState(this, movementSM);
@@ -68,15 +71,40 @@ public class Character : MonoBehaviour
         superAttacking = new SuperAttackState(this, movementSM);
 
         movementSM.Initialize(standing);
- 
+
         normalColliderHeight = controller.height;
         gravityValue *= gravityMultiplier;
     }
- 
+
+    private void LockCursor()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
+    private void UnlockCursor()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+
+    // Handle cursor locking when application loses/gains focus
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (hasFocus)
+        {
+            LockCursor();
+        }
+        else
+        {
+            UnlockCursor();
+        }
+    }
+
     private void Update()
     {
         movementSM.currentState.HandleInput();
- 
+
         movementSM.currentState.LogicUpdate();
     }
  
