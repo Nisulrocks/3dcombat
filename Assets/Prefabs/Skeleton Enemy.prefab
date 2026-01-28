@@ -2235,7 +2235,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   health: 3
   hitVFX: {fileID: 1000012909287652, guid: abb9f519b142e304d9c45b56afa768bc, type: 3}
-  ragdoll: {fileID: 0}
+  ragdoll: {fileID: 5841957933071386244, guid: 63a346cb0916b794baba15fb30dcf795, type: 3}
   attackCD: 3
   attackRange: 2
   aggroRange: 4
@@ -2245,6 +2245,15 @@ MonoBehaviour:
   rotationThreshold: 15
   movementBuffer: 0.3
   gravity: -9.81
+  obstacleDetectionRange: 5
+  avoidanceForce: 2
+  numberOfRays: 5
+  raySpreadAngle: 60
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  sideRayDistance: 1.5
+  wallSlideSpeed: 2
 --- !u!143 &6942330436117461256
 CharacterController:
   m_ObjectHideFlags: 0

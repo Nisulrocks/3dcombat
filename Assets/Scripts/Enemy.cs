@@ -24,19 +24,26 @@ public class Enemy : MonoBehaviour
     [SerializeField] float moveSpeed = 3.5f;
     [SerializeField] float rotationSpeed = 5f;
     [SerializeField] float stoppingDistance = 0.5f;
-    [SerializeField] float rotationThreshold = 15f; // Angle threshold before moving
-    [SerializeField] float movementBuffer = 0.3f; // Buffer to prevent rapid start/stop
+    [SerializeField] float rotationThreshold = 15f;
+    [SerializeField] float movementBuffer = 0.3f;
     [SerializeField] float gravity = -9.81f;
+
+    [Header("Obstacle Avoidance")]
+    [SerializeField] float obstacleDetectionRange = 2f;
+    [SerializeField] float avoidanceForce = 2f;
+    [SerializeField] int numberOfRays = 5;
+    [SerializeField] float raySpreadAngle = 60f;
+    [SerializeField] LayerMask obstacleLayer;
+    [SerializeField] float sideRayDistance = 1.5f;
+    [SerializeField] float wallSlideSpeed = 2f;
 
     GameObject player;
     Animator animator;
     CharacterController characterController;
-    Rigidbody rigidbody;
     float timePassed;
-    float newDestinationCD = 0.5f;
-    Vector3 moveDirection;
-    bool isMoving = false; // Track movement state for hysteresis
+    bool isMoving = false;
     Vector3 verticalVelocity;
+    Vector3 avoidanceDirection = Vector3.zero;
 
     void Start()
     {
@@ -46,7 +53,6 @@ public class Enemy : MonoBehaviour
         maxHealth = health;
         OnHealthChanged?.Invoke(health, maxHealth);
 
-        // Add CharacterController if it doesn't exist
         if (characterController == null)
         {
             characterController = gameObject.AddComponent<CharacterController>();
@@ -78,18 +84,25 @@ public class Enemy : MonoBehaviour
             verticalVelocity.y += gravity * Time.deltaTime;
         }
 
-        // Simple rotation and movement
         if (distanceToPlayer <= aggroRange)
         {
             // Calculate direction to player
-            Vector3 direction = (player.transform.position - transform.position).normalized;
-            direction.y = 0;
+            Vector3 directionToPlayer = (player.transform.position - transform.position).normalized;
+            directionToPlayer.y = 0;
 
-            if (direction != Vector3.zero)
+            // Detect obstacles and calculate avoidance
+            Vector3 avoidance = DetectObstacles();
+            
+            // Combine player direction with obstacle avoidance
+            Vector3 desiredDirection = directionToPlayer + avoidance;
+            desiredDirection.y = 0;
+            desiredDirection.Normalize();
+
+            if (desiredDirection != Vector3.zero)
             {
-                // Rotate towards player
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 0.05f);
+                // Rotate towards desired direction
+                Quaternion targetRotation = Quaternion.LookRotation(desiredDirection);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
 
                 // Hysteresis logic for movement
                 float stopThreshold = attackRange + stoppingDistance;
@@ -97,7 +110,6 @@ public class Enemy : MonoBehaviour
 
                 if (isMoving)
                 {
-                    // Continue moving until well beyond stop distance
                     if (distanceToPlayer > stopThreshold + movementBuffer)
                     {
                         horizontalMovement = transform.forward * moveSpeed * Time.deltaTime;
@@ -109,7 +121,6 @@ public class Enemy : MonoBehaviour
                 }
                 else
                 {
-                    // Start moving only when clearly beyond start distance
                     if (distanceToPlayer > stopThreshold + movementBuffer * 2f)
                     {
                         isMoving = true;
@@ -133,14 +144,13 @@ public class Enemy : MonoBehaviour
         else
         {
             isMoving = false;
-            // Apply gravity even when not moving
             if (characterController != null)
             {
                 characterController.Move(verticalVelocity * Time.deltaTime);
             }
         }
 
-        // Update animator based on movement state
+        // Update animator
         animator.SetFloat("speed", isMoving ? 1f : 0f);
 
         // Attack logic
@@ -153,45 +163,76 @@ public class Enemy : MonoBehaviour
             }
         }
         timePassed += Time.deltaTime;
-        newDestinationCD -= Time.deltaTime;
     }
 
-    void MoveTowardsPlayer()
+    Vector3 DetectObstacles()
     {
-        // Move forward in the direction the enemy is facing
-        moveDirection = transform.forward;
-    }
+        Vector3 avoidanceVector = Vector3.zero;
+        Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
 
-    void RotateTowardsPlayer()
-    {
-        Vector3 direction = (player.transform.position - transform.position).normalized;
-        direction.y = 0;
-
-        if (direction != Vector3.zero)
+        // Multi-ray obstacle detection in a cone pattern
+        for (int i = 0; i < numberOfRays; i++)
         {
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
-            // Use a smaller rotation speed multiplier for smoother rotation
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 0.1f);
+            float angle = -raySpreadAngle / 2 + (raySpreadAngle / (numberOfRays - 1)) * i;
+            Vector3 rayDirection = Quaternion.Euler(0, angle, 0) * transform.forward;
+
+            RaycastHit hit;
+            if (Physics.Raycast(rayOrigin, rayDirection, out hit, obstacleDetectionRange, obstacleLayer))
+            {
+                // Calculate avoidance force based on distance and angle
+                float distanceFactor = 1 - (hit.distance / obstacleDetectionRange);
+                float angleFactor = 1 - (Mathf.Abs(angle) / (raySpreadAngle / 2));
+                
+                // Calculate perpendicular avoidance direction
+                Vector3 avoidDirection = Vector3.Cross(hit.normal, Vector3.up).normalized;
+                
+                // Choose direction that moves away from obstacle
+                if (Vector3.Dot(avoidDirection, transform.right) < 0)
+                {
+                    avoidDirection = -avoidDirection;
+                }
+
+                avoidanceVector += avoidDirection * distanceFactor * angleFactor * avoidanceForce;
+
+                Debug.DrawRay(rayOrigin, rayDirection * hit.distance, Color.red);
+            }
+            else
+            {
+                Debug.DrawRay(rayOrigin, rayDirection * obstacleDetectionRange, Color.green);
+            }
         }
+
+        // Side detection for wall sliding
+        CheckWallSliding(ref avoidanceVector, rayOrigin);
+
+        return avoidanceVector;
     }
 
-    bool IsFacingPlayer()
+    void CheckWallSliding(ref Vector3 avoidanceVector, Vector3 rayOrigin)
     {
-        Vector3 directionToPlayer = (player.transform.position - transform.position).normalized;
-        directionToPlayer.y = 0;
+        // Check left side
+        RaycastHit leftHit;
+        if (Physics.Raycast(rayOrigin, -transform.right, out leftHit, sideRayDistance, obstacleLayer))
+        {
+            // Push away from left wall
+            avoidanceVector += transform.right * avoidanceForce * 0.5f;
+            Debug.DrawRay(rayOrigin, -transform.right * leftHit.distance, Color.yellow);
+        }
 
-        Vector3 forward = transform.forward;
-        forward.y = 0;
-
-        float angle = Vector3.Angle(forward, directionToPlayer);
-        return angle <= rotationThreshold;
+        // Check right side
+        RaycastHit rightHit;
+        if (Physics.Raycast(rayOrigin, transform.right, out rightHit, sideRayDistance, obstacleLayer))
+        {
+            // Push away from right wall
+            avoidanceVector += -transform.right * avoidanceForce * 0.5f;
+            Debug.DrawRay(rayOrigin, transform.right * rightHit.distance, Color.yellow);
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            print(true);
             player = collision.gameObject;
         }
     }
@@ -207,7 +248,6 @@ public class Enemy : MonoBehaviour
     {
         health -= damageAmount;
         animator.SetTrigger("damage");
-        //CameraShake.Instance.ShakeCamera(2f, 0.2f);
 
         OnHealthChanged?.Invoke(health, maxHealth);
 
@@ -227,6 +267,7 @@ public class Enemy : MonoBehaviour
             colliderController.StartDealDamage();
         }
     }
+
     public void EndDealDamage()
     {
         GetComponentInChildren<EnemyDamageDealer>().EndDealDamage();
@@ -250,5 +291,9 @@ public class Enemy : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, attackRange);
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, aggroRange);
+        
+        // Draw obstacle detection range
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, obstacleDetectionRange);
     }
 }
