@@ -104,26 +104,28 @@ public class Enemy : MonoBehaviour
                 Quaternion targetRotation = Quaternion.LookRotation(desiredDirection);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
 
-                // Hysteresis logic for movement
-                float stopThreshold = attackRange + stoppingDistance;
+                // Movement logic with proper hysteresis to prevent jitter
                 Vector3 horizontalMovement = Vector3.zero;
+                float startMoveBuffer = 0.1f; // Distance to start moving
+                float stopMoveBuffer = -0.1f; // Stop slightly inside attack range
 
-                if (isMoving)
+                // Always check if we need to start moving (even if currently stopped)
+                if (distanceToPlayer > attackRange + startMoveBuffer)
                 {
-                    if (distanceToPlayer > stopThreshold + movementBuffer)
-                    {
-                        horizontalMovement = transform.forward * moveSpeed * Time.deltaTime;
-                    }
-                    else
-                    {
-                        isMoving = false;
-                    }
+                    // Far enough to start moving
+                    horizontalMovement = transform.forward * moveSpeed * Time.deltaTime;
+                    isMoving = true;
+                }
+                else if (distanceToPlayer < attackRange + stopMoveBuffer)
+                {
+                    // Close enough to stop (slightly inside attack range)
+                    isMoving = false;
                 }
                 else
                 {
-                    if (distanceToPlayer > stopThreshold + movementBuffer * 2f)
+                    // In buffer zone - maintain current state but move if currently moving
+                    if (isMoving)
                     {
-                        isMoving = true;
                         horizontalMovement = transform.forward * moveSpeed * Time.deltaTime;
                     }
                 }
