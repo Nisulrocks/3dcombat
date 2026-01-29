@@ -42,12 +42,20 @@ public class EnemyTargetIndicator : MonoBehaviour
             // Check if target changed
             if (newTarget != currentTarget)
             {
+                // Unsubscribe from old target's death event
+                if (currentTarget != null)
+                {
+                    currentTarget.OnDied -= HandleTargetDied;
+                }
+                
                 currentTarget = newTarget;
                 
                 if (currentTarget != null)
                 {
                     targetIndicator.gameObject.SetActive(true);
                     targetIndicator.color = CameraSoftLock.Instance.IsInCombat() ? lockColor : targetColor;
+                    // Subscribe to new target's death event
+                    currentTarget.OnDied += HandleTargetDied;
                 }
                 else
                 {
@@ -68,6 +76,16 @@ public class EnemyTargetIndicator : MonoBehaviour
             {
                 targetIndicator.gameObject.SetActive(false);
             }
+        }
+    }
+
+    private void HandleTargetDied()
+    {
+        // Clear target and hide indicator when enemy dies
+        currentTarget = null;
+        if (targetIndicator != null)
+        {
+            targetIndicator.gameObject.SetActive(false);
         }
     }
 
@@ -136,6 +154,15 @@ public class EnemyTargetIndicator : MonoBehaviour
             
             // Make indicator smaller when off-screen
             targetIndicator.rectTransform.sizeDelta = Vector2.one * (indicatorSize * 0.7f);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // Clean up event subscriptions
+        if (currentTarget != null)
+        {
+            currentTarget.OnDied -= HandleTargetDied;
         }
     }
 }

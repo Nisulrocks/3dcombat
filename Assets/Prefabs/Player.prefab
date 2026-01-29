@@ -807,6 +807,7 @@ Transform:
   - {fileID: 1573803957574288656}
   - {fileID: 7416990311674139077}
   - {fileID: 6165520395595110753}
+  - {fileID: 6197608858526622290}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &4052607259216263480
@@ -879,6 +880,12 @@ MonoBehaviour:
   velocityDampTime: 0.1
   rotationDampTime: 0.2
   airControl: 0.5
+  groundCheck: {fileID: 6197608858526622290}
+  groundRadius: 0.1
+  whatIsGround:
+    serializedVersion: 2
+    m_Bits: 136
+  isGrounded: 0
   gravityValue: -9.81
   normalColliderHeight: 0
   controller: {fileID: 0}
@@ -983,8 +990,10 @@ MonoBehaviour:
   initialPushBackForce: 5
   radiusPushBackForce: 15
   radiusDamageVFX: {fileID: 9080140021571130472, guid: 82066d902ed0dd6488ddfd32eb994801, type: 3}
-  swordFireParticle: {fileID: 1260262680682125493, guid: 366377810aaf4fc4ab2be725a54c5712, type: 3}
+  swordFirePrefab: {fileID: 0}
   timeSlowScale: 0.1
+  superActivationDuration: 5
+  freeLookCamera: {fileID: 0}
 --- !u!1 &2136788266722871930
 GameObject:
   m_ObjectHideFlags: 0
@@ -1815,6 +1824,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1108940897005544564}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
+--- !u!1 &3844925339091292080
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6197608858526622290}
+  m_Layer: 8
+  m_Name: GroundCheck
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6197608858526622290
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3844925339091292080}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4629856647097603113}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4107707987249268216
 GameObject:
   m_ObjectHideFlags: 0

@@ -69,15 +69,9 @@ public class SprintState : State
         {
             stateMachine.ChangeState(character.sprintjumping);
         }
-
-        bool CheckGrounded()
-        {
-            float checkDistance = 0.5f;
-            return Physics.Raycast(character.transform.position, Vector3.down, checkDistance);
-        }
         
         // Check if character is falling (not grounded)
-        if (!CheckGrounded())
+        if (!character.CheckGrounded())
         {
             stateMachine.ChangeState(character.jumping);
         }

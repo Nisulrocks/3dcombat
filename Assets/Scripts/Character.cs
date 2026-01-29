@@ -18,8 +18,14 @@ public class Character : MonoBehaviour
     public float velocityDampTime = 0.9f;
     [Range(0, 1)]
     public float rotationDampTime = 0.2f;
-    [Range(0, 1)]
+    [Range(0, 5)]
     public float airControl = 0.5f;
+
+    [Header("Ground Detection")]
+    [SerializeField] private Transform groundCheck; 
+    [SerializeField] private float groundRadius; 
+    [SerializeField] private LayerMask whatIsGround; 
+    [SerializeField] private bool isGrounded;
  
     public StateMachine movementSM;
     public StandingState standing;
@@ -111,5 +117,11 @@ public class Character : MonoBehaviour
     private void FixedUpdate()
     {
         movementSM.currentState.PhysicsUpdate();
+    }
+
+    public bool CheckGrounded()
+    {
+        isGrounded=Physics.CheckSphere(groundCheck.position, groundRadius, (int) whatIsGround);
+        return isGrounded;
     }
 }

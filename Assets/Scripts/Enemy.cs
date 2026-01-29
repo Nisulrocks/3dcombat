@@ -281,8 +281,21 @@ public class Enemy : MonoBehaviour
  
     public void HitVFX(Vector3 hitPosition)
     {
+        if (hitVFX == null) return;
+
+        // Instantiate VFX at hit position
         GameObject hit = Instantiate(hitVFX, hitPosition, Quaternion.identity);
-        Destroy(hit, 3f);
+        
+        // Add FollowTargetVFX component to make it follow this transform
+        FollowTargetVFX followComponent = hit.GetComponent<FollowTargetVFX>();
+        if (followComponent == null)
+        {
+            followComponent = hit.AddComponent<FollowTargetVFX>();
+        }
+        
+        // Set target to this transform with offset from hit position
+        Vector3 offset = hitPosition - transform.position;
+        followComponent.SetTarget(transform, offset);
     }
  
     private void OnDrawGizmos()
