@@ -1940,8 +1940,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28e7e0e84ee7664489d79c991815a8fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HealthSystem
-  health: 50
-  maxHealth: 50
+  health: 100
+  maxHealth: 100
   hitVFX: {fileID: 1000012909287652, guid: abb9f519b142e304d9c45b56afa768bc, type: 3}
   ragdoll: {fileID: 7975616879779000031, guid: ec076037e28b71d4dab0262cf844b223, type: 3}
 --- !u!114 &2113068883960378229
