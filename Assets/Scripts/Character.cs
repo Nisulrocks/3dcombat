@@ -21,6 +21,15 @@ public class Character : MonoBehaviour
     [Range(0, 5)]
     public float airControl = 0.5f;
 
+    [Header("Stamina System")]
+    [SerializeField] private float maxStamina = 100f;
+    [SerializeField] private float currentStamina;
+    [SerializeField] private float staminaDrainRate = 20f; // Per second while sprinting
+    [SerializeField] private float staminaRegenRate = 10f; // Per second while not sprinting
+    [SerializeField] private float staminaRegenDelay = 1f; // Delay before regen starts
+    private float lastSprintTime;
+    private bool canSprint = true;
+
     [Header("Ground Detection")]
     [SerializeField] private Transform groundCheck; 
     [SerializeField] private float groundRadius; 
@@ -80,6 +89,9 @@ public class Character : MonoBehaviour
 
         normalColliderHeight = controller.height;
         gravityValue *= gravityMultiplier;
+        
+        // Initialize stamina
+        currentStamina = maxStamina;
     }
 
     private void LockCursor()
@@ -110,8 +122,10 @@ public class Character : MonoBehaviour
     private void Update()
     {
         movementSM.currentState.HandleInput();
-
         movementSM.currentState.LogicUpdate();
+        
+        // Update stamina
+        UpdateStamina();
     }
  
     private void FixedUpdate()
@@ -123,5 +137,52 @@ public class Character : MonoBehaviour
     {
         isGrounded=Physics.CheckSphere(groundCheck.position, groundRadius, (int) whatIsGround);
         return isGrounded;
+    }
+
+    private void UpdateStamina()
+    {
+        // Check if currently sprinting
+        bool isSprinting = movementSM.currentState == sprinting || movementSM.currentState == sprintjumping;
+        
+        if (isSprinting && currentStamina > 0)
+        {
+            // Drain stamina while sprinting
+            currentStamina = Mathf.Max(0, currentStamina - staminaDrainRate * Time.deltaTime);
+            lastSprintTime = Time.time;
+            
+            if (currentStamina <= 0)
+            {
+                canSprint = false;
+            }
+        }
+        else if (!isSprinting && Time.time - lastSprintTime >= staminaRegenDelay)
+        {
+            // Regenerate stamina after delay
+            currentStamina = Mathf.Min(maxStamina, currentStamina + staminaRegenRate * Time.deltaTime);
+            
+            if (currentStamina >= maxStamina * 0.2f) // Allow sprinting when at least 20% stamina
+            {
+                canSprint = true;
+            }
+        }
+    }
+
+    public bool CanSprint()
+    {
+        return canSprint && currentStamina > 0;
+    }
+
+    public float GetStaminaPercentage()
+    {
+        return currentStamina / maxStamina;
+    }
+
+    public void UseStamina(float amount)
+    {
+        currentStamina = Mathf.Max(0, currentStamina - amount);
+        if (currentStamina <= 0)
+        {
+            canSprint = false;
+        }
     }
 }

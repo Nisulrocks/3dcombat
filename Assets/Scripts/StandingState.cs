@@ -53,7 +53,7 @@ public class StandingState: State
         {
             crouch = true;
         }
-        if (sprintAction.triggered)
+        if (sprintAction.triggered && character.CanSprint())
         {
             sprint = true;
         }
