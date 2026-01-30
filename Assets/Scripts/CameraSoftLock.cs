@@ -88,7 +88,7 @@ public class CameraSoftLock : MonoBehaviour
         foreach (Collider collider in colliders)
         {
             Enemy enemy = collider.GetComponent<Enemy>();
-            if (enemy != null)
+            if (enemy != null && enemy.transform != null)
             {
                 // Check if enemy is in front of player
                 Vector3 toEnemy = (enemy.transform.position - transform.position).normalized;
@@ -113,13 +113,16 @@ public class CameraSoftLock : MonoBehaviour
         
         foreach (Enemy enemy in nearbyEnemies)
         {
-            Vector3 toEnemy = (enemy.transform.position - transform.position).normalized;
-            float angle = Vector3.Angle(transform.forward, toEnemy);
-            
-            if (angle < closestAngle)
+            if (enemy != null && enemy.transform != null)
             {
-                closestAngle = angle;
-                currentTarget = enemy;
+                Vector3 toEnemy = (enemy.transform.position - transform.position).normalized;
+                float angle = Vector3.Angle(transform.forward, toEnemy);
+                
+                if (angle < closestAngle)
+                {
+                    closestAngle = angle;
+                    currentTarget = enemy;
+                }
             }
         }
     }
@@ -188,11 +191,14 @@ public class CameraSoftLock : MonoBehaviour
         // Draw lines to nearby enemies
         foreach (Enemy enemy in nearbyEnemies)
         {
-            Debug.DrawLine(transform.position, enemy.transform.position, Color.yellow);
+            if (enemy != null && enemy.transform != null)
+            {
+                Debug.DrawLine(transform.position, enemy.transform.position, Color.yellow);
+            }
         }
         
         // Draw line to current target
-        if (currentTarget != null)
+        if (currentTarget != null && currentTarget.transform != null)
         {
             Debug.DrawLine(transform.position, currentTarget.transform.position, lockColor);
         }
