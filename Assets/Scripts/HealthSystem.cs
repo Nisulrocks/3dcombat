@@ -5,15 +5,20 @@ using UnityEngine;
 public class HealthSystem : MonoBehaviour
 {
     [SerializeField] float health = 100;
+    [SerializeField] float maxHealth = 100;
     [SerializeField] GameObject hitVFX;
     [SerializeField] GameObject ragdoll;
 
     private bool isInvincible = false;
  
+    public float CurrentHealth => health;
+    public float MaxHealth => maxHealth;
+
     Animator animator;
     void Start()
     {
         animator = GetComponent<Animator>();
+        maxHealth = health; // Set max health to initial health value
     }
 
     public void SetInvincible(bool invincible)
@@ -26,10 +31,12 @@ public class HealthSystem : MonoBehaviour
 
     public void TakeDamage(float damageAmount)
     {
-        // Don't take damage if invincible
+        // Don't take damage if invincible, but show invincible text
         if (isInvincible)
         {
             Debug.Log("HealthSystem: Damage blocked - player is invincible");
+            // Show invincible damage text
+            DamageText.CreateInvincibleText(transform.position + Vector3.up);
             return;
         }
 
@@ -51,9 +58,34 @@ public class HealthSystem : MonoBehaviour
 
     void Die()
     {
-        Instantiate(ragdoll, transform.position, transform.rotation);
+        // Force health to 0 to ensure UI updates
+        health = 0;
+        
+        // Update PlayerHUD immediately before destroying
+        if (PlayerHUD.Instance != null)
+        {
+            // Force immediate update without smoothing
+            PlayerHUD.Instance.ForceHealthUpdate(0, maxHealth);
+        }
+        
+        GameObject spawnedRagdoll = Instantiate(ragdoll, transform.position, transform.rotation);
+        
+        // Notify RespawnManager before destroying, pass the ragdoll reference
+        if (RespawnManager.Instance != null)
+        {
+            RespawnManager.Instance.OnPlayerDeath(transform.position, transform.rotation, spawnedRagdoll);
+        }
+        
         Destroy(this.gameObject);
     }
+
+    public void ResetHealth()
+    {
+        health = maxHealth;
+        isInvincible = false;
+        Debug.Log($"Health reset to {health}");
+    }
+
     public void HitVFX(Vector3 hitPosition)
     {
         if (hitVFX == null) return;

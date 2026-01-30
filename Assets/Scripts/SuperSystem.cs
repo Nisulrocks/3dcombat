@@ -59,17 +59,45 @@ public class SuperSystem : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        // Always set this as the instance (new player replaces old)
+        Instance = this;
 
         animator = GetComponent<Animator>();
         playerHealth = GetComponent<HealthSystem>();
+    }
+
+    public void SetPlayer(GameObject newPlayer)
+    {
+        animator = newPlayer.GetComponent<Animator>();
+        playerHealth = newPlayer.GetComponent<HealthSystem>();
+        
+        // Reset super state on respawn
+        ResetSuperState();
+    }
+
+    public void ResetSuperState()
+    {
+        isSuperActive = false;
+        isSuperReady = false;
+        isSuperAttackTriggered = false;
+        currentCharge = 0f;
+        superActivationTimer = 0f;
+        
+        if (superTimerCoroutine != null)
+        {
+            StopCoroutine(superTimerCoroutine);
+            superTimerCoroutine = null;
+        }
+        
+        DestroySwordFire();
+        
+        OnSuperChargeChanged?.Invoke(0f, maxSuperCharge);
+        OnSuperTimerChanged?.Invoke(0f, superActivationDuration);
+    }
+
+    public void SetFreeLookCamera(CinemachineCamera camera)
+    {
+        freeLookCamera = camera;
     }
 
     private void Start()
@@ -79,24 +107,14 @@ public class SuperSystem : MonoBehaviour
 
     private void Update()
     {
-        // Keep fire VFX alive during entire super - if it was destroyed, respawn it
-        if (isSuperActive && currentSwordFireInstance == null)
-        {
-            SpawnSwordFire();
-        }
+        // Fire VFX is now controlled by animation events, not auto-spawned
     }
 
     public void RefreshSwordFire()
     {
-        // Called when weapon is drawn to re-attach fire VFX if super is active
-        // Fire should persist during entire super (both before and during attack)
-        if (isSuperActive)
-        {
-            // Destroy old instance if exists
-            DestroySwordFire();
-            // Spawn new one on the new sword
-            SpawnSwordFire();
-        }
+        // Fire VFX is now controlled by animation events
+        // This method is no longer needed but kept for compatibility
+        // Fire will be spawned/destroyed by animation events
     }
 
     public void AddCharge(float amount)
@@ -132,16 +150,6 @@ public class SuperSystem : MonoBehaviour
         isSuperActive = true;
         isSuperReady = false;
         isSuperAttackTriggered = false;
-
-        // Make player invincible immediately
-        if (playerHealth != null)
-        {
-            playerHealth.SetInvincible(true);
-            Debug.Log("SuperSystem: Player is now INVINCIBLE");
-        }
-
-        // Spawn fire VFX on sword
-        SpawnSwordFire();
 
         // Initial push back enemies in range
         PushBackEnemiesInRange(initialPushBackForce);
@@ -185,16 +193,6 @@ public class SuperSystem : MonoBehaviour
         isSuperAttackTriggered = false;
         currentCharge = 0f;
         superActivationTimer = 0f;
-
-        // Remove invincibility
-        if (playerHealth != null)
-        {
-            playerHealth.SetInvincible(false);
-            Debug.Log("SuperSystem: Player invincibility REMOVED (super cancelled)");
-        }
-
-        // Destroy fire VFX
-        DestroySwordFire();
 
         // Stop timer coroutine if running
         if (superTimerCoroutine != null)
@@ -297,22 +295,12 @@ public class SuperSystem : MonoBehaviour
         currentCharge = 0f;
         superActivationTimer = 0f;
 
-        // Remove invincibility
-        if (playerHealth != null)
-        {
-            playerHealth.SetInvincible(false);
-            Debug.Log("SuperSystem: Player invincibility REMOVED (super ended)");
-        }
-
         // Stop timer coroutine if running
         if (superTimerCoroutine != null)
         {
             StopCoroutine(superTimerCoroutine);
             superTimerCoroutine = null;
         }
-
-        // Destroy fire VFX
-        DestroySwordFire();
 
         // Trigger move to return to idle
         if (animator != null)
@@ -436,6 +424,42 @@ public class SuperSystem : MonoBehaviour
             
             elapsed += Time.deltaTime;
             yield return null;
+        }
+    }
+
+    // Animation Events for controlling VFX and invincibility
+    
+    // Animation Event: Start fire VFX
+    public void StartFireVFX()
+    {
+        SpawnSwordFire();
+        Debug.Log("Fire VFX STARTED (animation event)");
+    }
+    
+    // Animation Event: End fire VFX
+    public void EndFireVFX()
+    {
+        DestroySwordFire();
+        Debug.Log("Fire VFX ENDED (animation event)");
+    }
+    
+    // Animation Event: Start invincibility
+    public void StartInvincibility()
+    {
+        if (playerHealth != null)
+        {
+            playerHealth.SetInvincible(true);
+            Debug.Log("Invincibility STARTED (animation event)");
+        }
+    }
+    
+    // Animation Event: End invincibility
+    public void EndInvincibility()
+    {
+        if (playerHealth != null)
+        {
+            playerHealth.SetInvincible(false);
+            Debug.Log("Invincibility ENDED (animation event)");
         }
     }
 

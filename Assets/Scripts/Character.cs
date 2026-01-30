@@ -185,4 +185,14 @@ public class Character : MonoBehaviour
             canSprint = false;
         }
     }
+
+    public float GetCurrentStamina()
+    {
+        return currentStamina;
+    }
+
+    public float GetMaxStamina()
+    {
+        return maxStamina;
+    }
 }

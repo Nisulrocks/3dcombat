@@ -64,6 +64,11 @@ public class Enemy : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player");
     }
 
+    public void SetPlayer(GameObject newPlayer)
+    {
+        player = newPlayer;
+    }
+
     void Update()
     {
         if (player == null)
@@ -93,17 +98,17 @@ public class Enemy : MonoBehaviour
             // Detect obstacles and calculate avoidance
             Vector3 avoidance = DetectObstacles();
             
-            // Combine player direction with obstacle avoidance
+            // Always prioritize rotation towards player for combat
+            Quaternion targetRotation = Quaternion.LookRotation(directionToPlayer);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            
+            // Combine player direction with obstacle avoidance for movement only
             Vector3 desiredDirection = directionToPlayer + avoidance;
             desiredDirection.y = 0;
             desiredDirection.Normalize();
 
             if (desiredDirection != Vector3.zero)
             {
-                // Rotate towards desired direction
-                Quaternion targetRotation = Quaternion.LookRotation(desiredDirection);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-
                 // Movement logic with proper hysteresis to prevent jitter
                 Vector3 horizontalMovement = Vector3.zero;
                 float startMoveBuffer = 0.1f; // Distance to start moving
@@ -112,8 +117,8 @@ public class Enemy : MonoBehaviour
                 // Always check if we need to start moving (even if currently stopped)
                 if (distanceToPlayer > attackRange + startMoveBuffer)
                 {
-                    // Far enough to start moving
-                    horizontalMovement = transform.forward * moveSpeed * Time.deltaTime;
+                    // Far enough to start moving - use avoidance-influenced direction
+                    horizontalMovement = desiredDirection * moveSpeed * Time.deltaTime;
                     isMoving = true;
                 }
                 else if (distanceToPlayer < attackRange + stopMoveBuffer)
@@ -126,7 +131,7 @@ public class Enemy : MonoBehaviour
                     // In buffer zone - maintain current state but move if currently moving
                     if (isMoving)
                     {
-                        horizontalMovement = transform.forward * moveSpeed * Time.deltaTime;
+                        horizontalMovement = desiredDirection * moveSpeed * Time.deltaTime;
                     }
                 }
 

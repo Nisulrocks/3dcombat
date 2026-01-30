@@ -17,19 +17,11 @@ public class SuperUI : MonoBehaviour
     [SerializeField] Color readyColor = Color.red;
     [SerializeField] Color timerColor = Color.cyan;
 
+    private SuperSystem currentSuperSystem;
+
     private void Start()
     {
-        if (SuperSystem.Instance != null)
-        {
-            SuperSystem.Instance.OnSuperChargeChanged += HandleChargeChanged;
-            SuperSystem.Instance.OnSuperReady += HandleSuperReady;
-            SuperSystem.Instance.OnSuperActivated += HandleSuperActivated;
-            SuperSystem.Instance.OnSuperEnded += HandleSuperEnded;
-            SuperSystem.Instance.OnSuperTimerChanged += HandleTimerChanged;
-
-            // Initialize UI
-            HandleChargeChanged(SuperSystem.Instance.CurrentCharge, SuperSystem.Instance.MaxCharge);
-        }
+        SubscribeToSuperSystem();
 
         // Hide ready text initially
         if (superReadyText != null)
@@ -40,6 +32,48 @@ public class SuperUI : MonoBehaviour
         // Hide timer slider initially
         if (superTimerSlider != null)
             superTimerSlider.gameObject.SetActive(false);
+    }
+
+    private void Update()
+    {
+        // Check if SuperSystem instance changed (player respawned)
+        if (SuperSystem.Instance != null && SuperSystem.Instance != currentSuperSystem)
+        {
+            UnsubscribeFromSuperSystem();
+            SubscribeToSuperSystem();
+        }
+    }
+
+    private void SubscribeToSuperSystem()
+    {
+        if (SuperSystem.Instance != null)
+        {
+            currentSuperSystem = SuperSystem.Instance;
+            currentSuperSystem.OnSuperChargeChanged += HandleChargeChanged;
+            currentSuperSystem.OnSuperReady += HandleSuperReady;
+            currentSuperSystem.OnSuperActivated += HandleSuperActivated;
+            currentSuperSystem.OnSuperEnded += HandleSuperEnded;
+            currentSuperSystem.OnSuperTimerChanged += HandleTimerChanged;
+
+            // Initialize UI
+            HandleChargeChanged(currentSuperSystem.CurrentCharge, currentSuperSystem.MaxCharge);
+            
+            // Reset UI state
+            HandleSuperEnded();
+        }
+    }
+
+    private void UnsubscribeFromSuperSystem()
+    {
+        if (currentSuperSystem != null)
+        {
+            currentSuperSystem.OnSuperChargeChanged -= HandleChargeChanged;
+            currentSuperSystem.OnSuperReady -= HandleSuperReady;
+            currentSuperSystem.OnSuperActivated -= HandleSuperActivated;
+            currentSuperSystem.OnSuperEnded -= HandleSuperEnded;
+            currentSuperSystem.OnSuperTimerChanged -= HandleTimerChanged;
+            currentSuperSystem = null;
+        }
     }
 
     private void HandleChargeChanged(float current, float max)
@@ -135,13 +169,6 @@ public class SuperUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (SuperSystem.Instance != null)
-        {
-            SuperSystem.Instance.OnSuperChargeChanged -= HandleChargeChanged;
-            SuperSystem.Instance.OnSuperReady -= HandleSuperReady;
-            SuperSystem.Instance.OnSuperActivated -= HandleSuperActivated;
-            SuperSystem.Instance.OnSuperEnded -= HandleSuperEnded;
-            SuperSystem.Instance.OnSuperTimerChanged -= HandleTimerChanged;
-        }
+        UnsubscribeFromSuperSystem();
     }
 }

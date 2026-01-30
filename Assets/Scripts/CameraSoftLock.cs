@@ -22,26 +22,44 @@ public class CameraSoftLock : MonoBehaviour
     private Enemy currentTarget;
     private List<Enemy> nearbyEnemies = new List<Enemy>();
     private bool inCombatMode = false;
+    private Character cachedPlayer;
 
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        // Always set this as the instance (new player replaces old)
+        Instance = this;
     }
 
     private void Start()
+    {
+        InitializeReferences();
+    }
+
+    private void InitializeReferences()
     {
         // Find free look camera if not assigned
         if (freeLookCamera == null)
         {
             freeLookCamera = FindObjectOfType<CinemachineCamera>();
         }
+        
+        // Cache player reference (this component is on the player)
+        cachedPlayer = GetComponent<Character>();
+        if (cachedPlayer == null)
+        {
+            cachedPlayer = FindObjectOfType<Character>();
+        }
+    }
+
+    public void SetPlayer(Character newPlayer)
+    {
+        cachedPlayer = newPlayer;
+        InitializeReferences();
+    }
+
+    public void SetFreeLookCamera(CinemachineCamera camera)
+    {
+        freeLookCamera = camera;
     }
 
     private void Update()
@@ -70,10 +88,14 @@ public class CameraSoftLock : MonoBehaviour
     private bool IsInCombatMode()
     {
         // Check if player is in combat state
-        Character character = FindObjectOfType<Character>();
-        if (character != null)
+        if (cachedPlayer == null)
         {
-            return character.movementSM.currentState == character.combatting;
+            cachedPlayer = FindObjectOfType<Character>();
+        }
+        
+        if (cachedPlayer != null)
+        {
+            return cachedPlayer.movementSM.currentState == cachedPlayer.combatting;
         }
         return false;
     }
@@ -132,8 +154,11 @@ public class CameraSoftLock : MonoBehaviour
         if (currentTarget == null) return;
         if (freeLookCamera == null) return;
 
-        Character player = FindObjectOfType<Character>();
-        if (player == null) return;
+        if (cachedPlayer == null)
+        {
+            cachedPlayer = FindObjectOfType<Character>();
+        }
+        if (cachedPlayer == null) return;
 
         // Get the OrbitalFollow component from the Cinemachine camera
         var orbitalFollow = freeLookCamera.GetComponent<CinemachineOrbitalFollow>();
@@ -142,7 +167,7 @@ public class CameraSoftLock : MonoBehaviour
         // Calculate desired look direction from player to target
         // Use enemy's center/head position instead of their feet
         Vector3 targetPosition = currentTarget.transform.position + Vector3.up * 3.5f; // Adjust height offset as needed
-        Vector3 targetDirection = (targetPosition - player.transform.position).normalized;
+        Vector3 targetDirection = (targetPosition - cachedPlayer.transform.position).normalized;
         
         // Calculate desired horizontal angle (around Y axis)
         float desiredHorizontalAngle = Mathf.Atan2(targetDirection.x, targetDirection.z) * Mathf.Rad2Deg;
