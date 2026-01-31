@@ -15,15 +15,31 @@ public class EquipmentSystem : MonoBehaviour
 
     public GameObject CurrentWeapon => currentWeaponInHand;
 
+    // Returns true if weapon is currently drawn (in hand)
+    public bool IsWeaponDrawn => currentWeaponInHand != null;
+
     void Start()
     {
         currentWeaponInSheath = Instantiate(weapon, weaponSheath.transform);
     }
- 
+
     public void DrawWeapon()
     {
+        // Prevent duplicate weapons - only draw if not already in hand
+        if (currentWeaponInHand != null)
+        {
+            Debug.Log("EquipmentSystem: Weapon already in hand, skipping draw");
+            return;
+        }
+
+        // Destroy sheath weapon first
+        if (currentWeaponInSheath != null)
+        {
+            Destroy(currentWeaponInSheath);
+            currentWeaponInSheath = null;
+        }
+
         currentWeaponInHand = Instantiate(weapon, weaponHolder.transform);
-        Destroy(currentWeaponInSheath);
 
         // Refresh sword fire VFX if super is active
         if (SuperSystem.Instance != null)
@@ -31,17 +47,31 @@ public class EquipmentSystem : MonoBehaviour
             SuperSystem.Instance.RefreshSwordFire();
         }
     }
- 
+
     public void SheathWeapon()
     {
+        // Prevent duplicate weapons - only sheath if not already in sheath
+        if (currentWeaponInSheath != null)
+        {
+            Debug.Log("EquipmentSystem: Weapon already in sheath, skipping sheath");
+            return;
+        }
+
+        // Destroy hand weapon first
+        if (currentWeaponInHand != null)
+        {
+            Destroy(currentWeaponInHand);
+            currentWeaponInHand = null;
+        }
+
         currentWeaponInSheath = Instantiate(weapon, weaponSheath.transform);
-        Destroy(currentWeaponInHand);
     }
 
     public void StartDealDamage()
     {
         if (currentWeaponInHand != null)
         {
+            // Player damage dealer (damages enemies)
             DamageDealer damageDealer = currentWeaponInHand.GetComponentInChildren<DamageDealer>();
             if (damageDealer != null)
             {
@@ -60,6 +90,7 @@ public class EquipmentSystem : MonoBehaviour
     {
         if (currentWeaponInHand != null)
         {
+            // Player damage dealer
             DamageDealer damageDealer = currentWeaponInHand.GetComponentInChildren<DamageDealer>();
             if (damageDealer != null)
             {
