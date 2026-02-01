@@ -427,4 +427,46 @@ public class BossHUD : MonoBehaviour
     
     // Public properties for BossEnemy to access
     public float HudShowDistance => hudShowDistance;
+    
+    // Force immediate health update (used when boss dies)
+    public void ForceHealthUpdate(float currentHealth, float maxHealth)
+    {
+        if (healthSlider != null)
+        {
+            healthSlider.value = currentHealth / maxHealth;
+        }
+        
+        if (healthText != null)
+        {
+            healthText.text = $"{Mathf.Round(currentHealth)}/{Mathf.Round(maxHealth)}";
+        }
+        
+        // Update health bar color based on final health
+        Image healthFill = healthSlider.fillRect?.GetComponent<Image>();
+        if (healthFill != null)
+        {
+            healthFill.color = GetHealthColor(currentHealth / maxHealth);
+        }
+        
+        Debug.Log($"BossHUD: Force updated health to {currentHealth}/{maxHealth}");
+    }
+    
+    // Hide HUD after delay (used when boss dies)
+    public void HideAfterDelay(float delay)
+    {
+        StartCoroutine(HideAfterDelayCoroutine(delay));
+    }
+    
+    private System.Collections.IEnumerator HideAfterDelayCoroutine(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        
+        if (hudPanel != null)
+        {
+            hudPanel.SetActive(false);
+            Debug.Log("BossHUD: Hidden panel after boss death delay");
+        }
+        
+        StopUpdateCoroutine();
+    }
 }

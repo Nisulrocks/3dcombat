@@ -1129,6 +1129,19 @@ public class BossEnemy : MonoBehaviour
 
     private void Die()
     {
+        // Force health to 0 to ensure HUD updates
+        currentHealth = 0;
+        
+        // Update BossHUD immediately before destroying
+        if (bossHUD != null)
+        {
+            // Force immediate update without smoothing
+            bossHUD.ForceHealthUpdate(0, maxHealth);
+            
+            // Hide HUD after 0.5 seconds
+            bossHUD.HideAfterDelay(0.5f);
+        }
+
         // Spawn ragdoll like regular enemies
         if (ragdoll != null)
         {
