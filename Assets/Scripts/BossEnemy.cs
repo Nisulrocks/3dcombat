@@ -5,7 +5,7 @@ using Unity.Cinemachine;
 public class BossEnemy : MonoBehaviour
 {
     #region FSM State Types
-    private enum BossState
+    public enum BossState
     {
         Idle,
         Patrol,
@@ -15,6 +15,7 @@ public class BossEnemy : MonoBehaviour
         Rage,
         Heal,
         Summon,
+        Emote,
         ReturnToCenter
     }
     #endregion
@@ -48,10 +49,17 @@ public class BossEnemy : MonoBehaviour
     [SerializeField] private float comboTimeWindow = 0.5f;
     [SerializeField] private int maxComboCount = 3;
 
+    [Header("Heal Settings")]
+    [SerializeField] private float healThreshold1 = 0.75f; // Heal at 75% health
+    [SerializeField] private float healThreshold2 = 0.5f;  // Heal at 50% health
+    [SerializeField] private float healDuration = 3f;
+    [SerializeField] private float healPerSecond = 50f;
+    [SerializeField] private float healCooldown = 15f;
+    [SerializeField] private float shieldChance = 0.3f;
+
     [Header("Shield Settings")]
     [SerializeField] private float shieldDuration = 3f;
     [SerializeField] private float shieldCooldown = 5f;
-    [SerializeField] private float shieldChance = 0.3f;
 
     [Header("Rage Mode Settings")]
     [SerializeField, Range(0f, 1f)] private float rageHealthThreshold = 0.3f; // Health % to trigger rage
@@ -61,12 +69,6 @@ public class BossEnemy : MonoBehaviour
     [SerializeField] private float rageDamageMultiplier = 3f;
     [SerializeField] private float pushbackForce = 15f;
     [SerializeField] private float pushbackRadius = 5f;
-
-    [Header("Heal Settings")]
-    [SerializeField] private float healDuration = 3f;
-    [SerializeField] private float healAmount = 125f; // 25% of 500
-    [SerializeField, Range(0f, 1f)] private float healThreshold1 = 0.75f; // 75%
-    [SerializeField, Range(0f, 1f)] private float healThreshold2 = 0.5f; // 50%
 
     [Header("Summon Settings")]
     [SerializeField] private GameObject skeletonPrefab; // Enemy prefab to summon
@@ -78,6 +80,10 @@ public class BossEnemy : MonoBehaviour
     [SerializeField] private float minSummonDistance = 3f; // Min distance from boss
     [SerializeField] private GameObject summonVFX;
     [SerializeField] private AudioClip summonSFX;
+
+    [Header("Emote Settings")]
+    [SerializeField] private float emoteDuration = 3f;
+    [SerializeField] private float emoteCooldown = 10f;
 
     [Header("Auto-Heal Settings")]
     [SerializeField] private float combatTimeout = 60f;
@@ -112,16 +118,33 @@ public class BossEnemy : MonoBehaviour
     private GameObject currentShield;
     private GameObject currentRageVFX;
     private AudioSource audioSource;
+    
+    // Public properties for HUD access
+    public BossState CurrentState => currentState;
+    public float CurrentHealth => currentHealth;
+    public float MaxHealth => maxHealth;
+    public float HealthPercentage => currentHealth / maxHealth;
+    public bool IsInvincible => isInvincible;
+    public bool IsHealing => isHealing;
+    public bool IsInRageMode => isInRageMode;
+    public GameObject CurrentShield => currentShield;
+    public float ShieldCooldownTimer => shieldCooldownTimer;
+    public float RageCooldownTimer => rageCooldownTimer;
+    public float RageCooldown => rageCooldown;
+    public float ShieldCooldown => shieldCooldown;
+    public float HealCooldownTimer => healCooldownTimer;
+    public float HealCooldown => healCooldown;
+    public float SummonCooldownTimer => summonCooldownTimer;
+    public float SummonCooldown => summonCooldown;
 
     // Combat tracking
     private int currentCombo = 0;
     private float lastAttackTime;
     private float lastDamageTime;
     private bool isAttacking = false;
-    private bool isInvincible = false;
-    private bool isInRageMode = false;
-    private bool isHealing = false;
-    private bool isSummoning = false;
+    
+    // HUD reference
+    private BossHUD bossHUD;
 
     // Cooldowns and timers
     private float shieldCooldownTimer = 0f;
@@ -130,8 +153,15 @@ public class BossEnemy : MonoBehaviour
     private float healCooldownTimer = 0f;
     private float autoHealTimer = 0f;
     private float summonCooldownTimer = 0f;
+    private float emoteCooldownTimer = 0f;
     private bool hasHealedAt75 = false;
     private bool hasHealedAt50 = false;
+    
+    // State booleans
+    private bool isInvincible = false;
+    private bool isInRageMode = false;
+    private bool isHealing = false;
+    private bool isSummoning = false;
 
     // Patrol
     private Vector3 currentPatrolTarget;
@@ -140,14 +170,6 @@ public class BossEnemy : MonoBehaviour
     // Attack
     private float attackCooldownTimer = 0f;
     private bool canDealDamage = false;
-    #endregion
-
-    #region Properties
-    public bool IsInvincible => isInvincible;
-    public bool IsInRageMode => isInRageMode;
-    public float CurrentHealth => currentHealth;
-    public float MaxHealth => maxHealth;
-    public float HealthPercentage => currentHealth / maxHealth;
     #endregion
 
     #region Unity Lifecycle
@@ -160,6 +182,9 @@ public class BossEnemy : MonoBehaviour
         {
             audioSource = gameObject.AddComponent<AudioSource>();
         }
+        
+        // Find HUD reference
+        bossHUD = FindObjectOfType<BossHUD>();
     }
 
     private void Start()
@@ -196,6 +221,7 @@ public class BossEnemy : MonoBehaviour
         if (attackCooldownTimer > 0) attackCooldownTimer -= Time.deltaTime;
         if (healCooldownTimer > 0) healCooldownTimer -= Time.deltaTime;
         if (summonCooldownTimer > 0) summonCooldownTimer -= Time.deltaTime;
+        if (emoteCooldownTimer > 0) emoteCooldownTimer -= Time.deltaTime;
 
         if (isInRageMode)
         {
@@ -251,6 +277,9 @@ public class BossEnemy : MonoBehaviour
             case BossState.Summon:
                 HandleSummonState();
                 break;
+            case BossState.Emote:
+                HandleEmoteState();
+                break;
             case BossState.ReturnToCenter:
                 HandleReturnToCenterState();
                 break;
@@ -299,6 +328,9 @@ public class BossEnemy : MonoBehaviour
                 break;
             case BossState.Summon:
                 StartSummon();
+                break;
+            case BossState.Emote:
+                StartEmote();
                 break;
             case BossState.ReturnToCenter:
                 animator.SetFloat("speed", 1f);  // Walk at 1
@@ -470,6 +502,12 @@ public class BossEnemy : MonoBehaviour
         {
             ChangeState(BossState.Chase);
         }
+    }
+
+    private void HandleEmoteState()
+    {
+        // Emote state is handled by coroutine
+        // Just wait for the emote to finish
     }
 
     private void HandleReturnToCenterState()
@@ -789,7 +827,7 @@ public class BossEnemy : MonoBehaviour
 
         isHealing = true;
         isInvincible = true;
-        healCooldownTimer = shieldCooldown; // Use shield cooldown for heal cooldown
+        healCooldownTimer = healCooldown;
 
         animator.SetTrigger("heal");
         animator.SetBool("isHealing", true);
@@ -816,7 +854,6 @@ public class BossEnemy : MonoBehaviour
 
     private IEnumerator HealCoroutine()
     {
-        float healPerSecond = healAmount / healDuration;
         float elapsed = 0f;
 
         while (elapsed < healDuration)
@@ -934,6 +971,12 @@ public class BossEnemy : MonoBehaviour
         // Spawn skeleton
         GameObject skeleton = Instantiate(skeletonPrefab, spawnPosition, Quaternion.identity);
         
+        // Notify HUD of new ally
+        if (bossHUD != null)
+        {
+            bossHUD.OnAllySummoned(skeleton);
+        }
+        
         Debug.Log($"Boss: Summoned single skeleton at {spawnPosition}");
     }
 
@@ -951,6 +994,70 @@ public class BossEnemy : MonoBehaviour
         {
             ChangeState(BossState.Chase);
         }
+    }
+    #endregion
+
+    #region Emote System
+    private void StartEmote()
+    {
+        if (emoteCooldownTimer > 0) return;
+
+        emoteCooldownTimer = emoteCooldown;
+
+        // Play random emote animation
+        int emoteType = Random.Range(0, 3); // 3 different emotes
+        switch (emoteType)
+        {
+            case 0:
+                animator.SetTrigger("emote_laugh");
+                Debug.Log("Boss: Playing LAUGH emote!");
+                break;
+            case 1:
+                animator.SetTrigger("emote_dance");
+                Debug.Log("Boss: Playing DANCE emote!");
+                break;
+            case 2:
+                animator.SetTrigger("emote_taunt");
+                Debug.Log("Boss: Playing TAUNT emote!");
+                break;
+        }
+
+        StartCoroutine(EmoteCoroutine());
+    }
+
+    private IEnumerator EmoteCoroutine()
+    {
+        yield return new WaitForSeconds(emoteDuration);
+        
+        EndEmote();
+        if (currentState == BossState.Emote)
+        {
+            ChangeState(BossState.Chase);
+        }
+    }
+
+    private void EndEmote()
+    {
+        Debug.Log("Boss: Emote animation ended");
+    }
+
+    // Called by animation event when emote ends
+    public void EndEmoteEvent()
+    {
+        EndEmote();
+        if (currentState == BossState.Emote)
+        {
+            ChangeState(BossState.Chase);
+        }
+    }
+
+    // Public method to trigger emote (called when boss kills player)
+    public void TriggerVictoryEmote()
+    {
+        if (emoteCooldownTimer > 0) return;
+
+        ChangeState(BossState.Emote);
+        Debug.Log("Boss: Triggered victory emote after killing player!");
     }
     #endregion
 

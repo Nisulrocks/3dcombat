@@ -213,7 +213,7 @@ Transform:
   m_GameObject: {fileID: 6295527727426755730}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.378, z: 0}
+  m_LocalPosition: {x: 0, y: -0.074, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -233,12 +233,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossDamageDealer
   damage: 25
   rageDamage: 75
+  weaponLength: 0.65
   playerLayer:
     serializedVersion: 2
     m_Bits: 256
-  damageRadius: 0.29
   damageCooldown: 0.1
   comboMultiplier: 0.25
   slashVFX: {fileID: 0}
   vfxSpawnPoint: {fileID: 0}
   hitSFX: {fileID: 0}
+  swordColliderController: {fileID: 62537932262240313}

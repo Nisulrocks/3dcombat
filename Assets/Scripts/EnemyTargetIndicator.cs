@@ -11,11 +11,14 @@ public class EnemyTargetIndicator : MonoBehaviour
     [SerializeField] float indicatorSize = 50f;
     [SerializeField] float edgeOffset = 50f;
     [SerializeField] float targetHeightOffset = 1.5f;
+    [SerializeField] float bossHeightOffset = 3f; // Higher offset for boss
     [SerializeField] Color targetColor = Color.red;
     [SerializeField] Color lockColor = Color.yellow;
+    [SerializeField] Color bossColor = Color.magenta; // Different color for boss
 
     private Camera mainCamera;
     private Enemy currentTarget;
+    private BossEnemy currentBossTarget;
 
     private void Start()
     {
@@ -38,9 +41,10 @@ public class EnemyTargetIndicator : MonoBehaviour
         if (CameraSoftLock.Instance != null)
         {
             Enemy newTarget = CameraSoftLock.Instance.GetCurrentTarget();
+            BossEnemy newBossTarget = CameraSoftLock.Instance.GetCurrentBossTarget();
             
             // Check if target changed
-            if (newTarget != currentTarget)
+            if (newTarget != currentTarget || newBossTarget != currentBossTarget)
             {
                 // Unsubscribe from old target's death event
                 if (currentTarget != null)
@@ -49,6 +53,7 @@ public class EnemyTargetIndicator : MonoBehaviour
                 }
                 
                 currentTarget = newTarget;
+                currentBossTarget = newBossTarget;
                 
                 if (currentTarget != null)
                 {
@@ -57,6 +62,11 @@ public class EnemyTargetIndicator : MonoBehaviour
                     // Subscribe to new target's death event
                     currentTarget.OnDied += HandleTargetDied;
                 }
+                else if (currentBossTarget != null)
+                {
+                    targetIndicator.gameObject.SetActive(true);
+                    targetIndicator.color = bossColor; // Boss gets special color
+                }
                 else
                 {
                     targetIndicator.gameObject.SetActive(false);
@@ -64,7 +74,7 @@ public class EnemyTargetIndicator : MonoBehaviour
             }
 
             // Update indicator position
-            if (currentTarget != null && targetIndicator != null)
+            if ((currentTarget != null || currentBossTarget != null) && targetIndicator != null)
             {
                 UpdateIndicatorPosition();
             }
@@ -83,6 +93,7 @@ public class EnemyTargetIndicator : MonoBehaviour
     {
         // Clear target and hide indicator when enemy dies
         currentTarget = null;
+        currentBossTarget = null;
         if (targetIndicator != null)
         {
             targetIndicator.gameObject.SetActive(false);
@@ -91,10 +102,14 @@ public class EnemyTargetIndicator : MonoBehaviour
 
     private void UpdateIndicatorPosition()
     {
-        if (currentTarget == null || mainCamera == null) return;
+        if (currentTarget == null && currentBossTarget == null || mainCamera == null) return;
 
-        // Apply height offset to target enemy's upper body/head
-        Vector3 targetPosition = currentTarget.transform.position + Vector3.up * targetHeightOffset;
+        // Determine target and height offset
+        Transform targetTransform = currentTarget != null ? currentTarget.transform : currentBossTarget.transform;
+        float heightOffset = currentTarget != null ? targetHeightOffset : bossHeightOffset;
+
+        // Apply height offset to target's upper body/head
+        Vector3 targetPosition = targetTransform.position + Vector3.up * heightOffset;
         Vector3 screenPosition = mainCamera.WorldToScreenPoint(targetPosition);
 
         // Check if target is on screen
@@ -164,5 +179,8 @@ public class EnemyTargetIndicator : MonoBehaviour
         {
             currentTarget.OnDied -= HandleTargetDied;
         }
+        
+        // Clear boss target reference
+        currentBossTarget = null;
     }
 }

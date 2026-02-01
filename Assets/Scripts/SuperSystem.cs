@@ -360,6 +360,24 @@ public class SuperSystem : MonoBehaviour
 
                 Debug.Log($"Radius damage dealt to {enemy.name}: {radiusDamage}");
             }
+            
+            // Also check for BossEnemy
+            BossEnemy boss = hitCollider.GetComponent<BossEnemy>();
+            if (boss != null)
+            {
+                // Get base sword damage from equipment system
+                EquipmentSystem equipment = GetComponent<EquipmentSystem>();
+                float baseDamage = 10f; // Default damage if can't get from equipment
+                
+                // Apply radius damage (base * radiusDamageMultiplier)
+                float radiusDamage = baseDamage * radiusDamageMultiplier;
+                boss.TakeDamage(radiusDamage);
+
+                // Spawn SUPER damage text
+                DamageText.CreateSuperDamageText(boss.transform.position + Vector3.up * 2f, radiusDamage);
+
+                Debug.Log($"Radius damage dealt to BOSS {boss.name}: {radiusDamage}");
+            }
         }
 
         // Push back enemies with strong force

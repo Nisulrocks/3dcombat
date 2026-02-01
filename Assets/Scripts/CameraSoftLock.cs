@@ -20,7 +20,9 @@ public class CameraSoftLock : MonoBehaviour
     [SerializeField] Color rangeColor = Color.yellow;
 
     private Enemy currentTarget;
+    private BossEnemy currentBossTarget;
     private List<Enemy> nearbyEnemies = new List<Enemy>();
+    private List<BossEnemy> nearbyBosses = new List<BossEnemy>();
     private bool inCombatMode = false;
     private Character cachedPlayer;
 
@@ -70,12 +72,14 @@ public class CameraSoftLock : MonoBehaviour
         if (inCombatMode)
         {
             FindNearbyEnemies();
+            FindNearbyBosses();
             UpdateSoftLockTarget();
             ApplySoftLock();
         }
         else
         {
             currentTarget = null;
+            currentBossTarget = null;
         }
 
         // Draw debug lines in Update (Debug.DrawLine works here)
@@ -124,26 +128,73 @@ public class CameraSoftLock : MonoBehaviour
         }
     }
 
+    private void FindNearbyBosses()
+    {
+        nearbyBosses.Clear();
+        
+        // Find all bosses within range
+        Collider[] colliders = Physics.OverlapSphere(transform.position, lockRange, enemyLayer);
+        
+        foreach (Collider collider in colliders)
+        {
+            BossEnemy boss = collider.GetComponent<BossEnemy>();
+            if (boss != null && boss.transform != null)
+            {
+                // Check if boss is in front of player
+                Vector3 toBoss = (boss.transform.position - transform.position).normalized;
+                float angle = Vector3.Angle(transform.forward, toBoss);
+                
+                if (angle <= lockAngleThreshold)
+                {
+                    nearbyBosses.Add(boss);
+                }
+            }
+        }
+    }
+
     private void UpdateSoftLockTarget()
     {
         currentTarget = null;
+        currentBossTarget = null;
 
-        if (nearbyEnemies.Count == 0) return;
-
-        // Find the closest enemy to the center of the screen
-        float closestAngle = float.MaxValue;
-        
-        foreach (Enemy enemy in nearbyEnemies)
+        // Prioritize bosses over regular enemies
+        if (nearbyBosses.Count > 0)
         {
-            if (enemy != null && enemy.transform != null)
+            // Find the closest boss to the center of the screen
+            float closestAngle = float.MaxValue;
+            
+            foreach (BossEnemy boss in nearbyBosses)
             {
-                Vector3 toEnemy = (enemy.transform.position - transform.position).normalized;
-                float angle = Vector3.Angle(transform.forward, toEnemy);
-                
-                if (angle < closestAngle)
+                if (boss != null && boss.transform != null)
                 {
-                    closestAngle = angle;
-                    currentTarget = enemy;
+                    Vector3 toBoss = (boss.transform.position - transform.position).normalized;
+                    float angle = Vector3.Angle(transform.forward, toBoss);
+                    
+                    if (angle < closestAngle)
+                    {
+                        closestAngle = angle;
+                        currentBossTarget = boss;
+                    }
+                }
+            }
+        }
+        else if (nearbyEnemies.Count > 0)
+        {
+            // Find the closest enemy to the center of the screen
+            float closestAngle = float.MaxValue;
+            
+            foreach (Enemy enemy in nearbyEnemies)
+            {
+                if (enemy != null && enemy.transform != null)
+                {
+                    Vector3 toEnemy = (enemy.transform.position - transform.position).normalized;
+                    float angle = Vector3.Angle(transform.forward, toEnemy);
+                    
+                    if (angle < closestAngle)
+                    {
+                        closestAngle = angle;
+                        currentTarget = enemy;
+                    }
                 }
             }
         }
@@ -151,6 +202,14 @@ public class CameraSoftLock : MonoBehaviour
 
     private void ApplySoftLock()
     {
+        // Check for boss target first (prioritized)
+        if (currentBossTarget != null)
+        {
+            ApplySoftLockToTarget(currentBossTarget.transform);
+            return;
+        }
+        
+        // Fall back to regular enemy
         if (currentTarget == null) return;
         if (freeLookCamera == null) return;
 
@@ -167,6 +226,61 @@ public class CameraSoftLock : MonoBehaviour
         // Calculate desired look direction from player to target
         // Use enemy's center/head position instead of their feet
         Vector3 targetPosition = currentTarget.transform.position + Vector3.up * 3.5f; // Adjust height offset as needed
+        Vector3 targetDirection = (targetPosition - cachedPlayer.transform.position).normalized;
+        
+        // Calculate desired horizontal angle (around Y axis)
+        float desiredHorizontalAngle = Mathf.Atan2(targetDirection.x, targetDirection.z) * Mathf.Rad2Deg;
+        
+        // Calculate desired vertical angle (up/down) - FIXED: Remove the negative sign
+        float horizontalDistance = new Vector3(targetDirection.x, 0, targetDirection.z).magnitude;
+        float desiredVerticalAngle = Mathf.Atan2(targetDirection.y, horizontalDistance) * Mathf.Rad2Deg;
+
+        // Get current orbital angles
+        float currentHorizontal = orbitalFollow.HorizontalAxis.Value;
+        float currentVertical = orbitalFollow.VerticalAxis.Value;
+
+        // Calculate differences
+        float horizontalDiff = Mathf.DeltaAngle(currentHorizontal, desiredHorizontalAngle);
+        float verticalDiff = Mathf.DeltaAngle(currentVertical, desiredVerticalAngle);
+
+        // Apply smooth influence
+        if (Mathf.Abs(horizontalDiff) > 0.5f)
+        {
+            float horizontalInfluence = Mathf.Sign(horizontalDiff) * Mathf.Min(
+                Mathf.Abs(horizontalDiff) * influenceStrength,
+                maxTurnSpeed * Time.deltaTime
+            );
+            orbitalFollow.HorizontalAxis.Value += horizontalInfluence;
+        }
+
+        if (Mathf.Abs(verticalDiff) > 0.5f)
+        {
+            float verticalInfluence = Mathf.Sign(verticalDiff) * Mathf.Min(
+                Mathf.Abs(verticalDiff) * influenceStrength,
+                maxTurnSpeed * Time.deltaTime
+            );
+            orbitalFollow.VerticalAxis.Value += verticalInfluence;
+        }
+    }
+
+    private void ApplySoftLockToTarget(Transform targetTransform)
+    {
+        if (targetTransform == null) return;
+        if (freeLookCamera == null) return;
+
+        if (cachedPlayer == null)
+        {
+            cachedPlayer = FindObjectOfType<Character>();
+        }
+        if (cachedPlayer == null) return;
+
+        // Get the OrbitalFollow component from the Cinemachine camera
+        var orbitalFollow = freeLookCamera.GetComponent<CinemachineOrbitalFollow>();
+        if (orbitalFollow == null) return;
+
+        // Calculate desired look direction from player to target
+        // Use boss's center/head position instead of their feet
+        Vector3 targetPosition = targetTransform.position + Vector3.up * 4f; // Higher offset for boss
         Vector3 targetDirection = (targetPosition - cachedPlayer.transform.position).normalized;
         
         // Calculate desired horizontal angle (around Y axis)
@@ -222,10 +336,25 @@ public class CameraSoftLock : MonoBehaviour
             }
         }
         
+        // Draw lines to nearby bosses
+        foreach (BossEnemy boss in nearbyBosses)
+        {
+            if (boss != null && boss.transform != null)
+            {
+                Debug.DrawLine(transform.position, boss.transform.position, Color.magenta);
+            }
+        }
+        
         // Draw line to current target
         if (currentTarget != null && currentTarget.transform != null)
         {
             Debug.DrawLine(transform.position, currentTarget.transform.position, lockColor);
+        }
+        
+        // Draw line to current boss target
+        if (currentBossTarget != null && currentBossTarget.transform != null)
+        {
+            Debug.DrawLine(transform.position, currentBossTarget.transform.position, Color.magenta);
         }
     }
 
@@ -254,9 +383,14 @@ public class CameraSoftLock : MonoBehaviour
         return currentTarget;
     }
 
+    public BossEnemy GetCurrentBossTarget()
+    {
+        return currentBossTarget;
+    }
+
     public bool HasTarget()
     {
-        return currentTarget != null;
+        return currentTarget != null || currentBossTarget != null;
     }
 
     public bool IsInCombat()

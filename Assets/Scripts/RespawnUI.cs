@@ -37,11 +37,12 @@ public class RespawnUI : MonoBehaviour
     public void Show()
     {
         gameObject.SetActive(true);
+        SetAlpha(1f); // Show with full alpha
     }
 
     public void Hide()
     {
-        gameObject.SetActive(false);
+        SetAlpha(0f); // Hide by setting alpha to 0, but keep GameObject active
     }
 
     public void SetAlpha(float alpha)

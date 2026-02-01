@@ -1,13 +1,13 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class BossDamageDealer : MonoBehaviour
 {
     [Header("Damage Settings")]
     [SerializeField] private float damage = 25f;
     [SerializeField] private float rageDamage = 75f;
+    [SerializeField] private float weaponLength = 2f;
     [SerializeField] private LayerMask playerLayer;
-    [SerializeField] private float damageRadius = 1.5f;
-    [SerializeField] private float damageCooldown = 0.3f; // Time between damage checks during window
 
     [Header("Combo Settings")]
     [SerializeField] private float comboMultiplier = 0.25f; // 25% more per combo level
@@ -19,17 +19,25 @@ public class BossDamageDealer : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private AudioClip hitSFX;
 
+    [Header("Collider Control")]
+    [SerializeField] private SwordColliderController swordColliderController;
+
     private BossEnemy bossEnemy;
     private AudioSource audioSource;
     private bool damageWindowActive = false;
-    private float damageCooldownTimer = 0f;
     private int currentCombo = 1;
-    private bool hasDealtDamageThisWindow = false;
+    private List<GameObject> hasDealtDamage = new List<GameObject>();
 
     private void Awake()
     {
         bossEnemy = GetComponentInParent<BossEnemy>();
         audioSource = GetComponentInParent<AudioSource>();
+        
+        // Find SwordColliderController if not assigned
+        if (swordColliderController == null)
+        {
+            swordColliderController = GetComponentInChildren<SwordColliderController>();
+        }
         
         if (audioSource == null)
         {
@@ -41,14 +49,7 @@ public class BossDamageDealer : MonoBehaviour
     {
         if (!damageWindowActive) return;
 
-        // Cooldown between damage checks
-        if (damageCooldownTimer > 0)
-        {
-            damageCooldownTimer -= Time.deltaTime;
-            return;
-        }
-
-        // Continuously check for player during damage window
+        // Continuously check for player during damage window (no cooldown like player)
         CheckAndDealDamage();
     }
 
@@ -56,17 +57,30 @@ public class BossDamageDealer : MonoBehaviour
     public void StartDamageWindow()
     {
         damageWindowActive = true;
-        hasDealtDamageThisWindow = false;
-        damageCooldownTimer = 0f;
-        Debug.Log("Damage Window STARTED");
+        hasDealtDamage.Clear();
+        
+        // Enable sword collider for camera shake via Cinemachine collision impulse
+        if (swordColliderController != null)
+        {
+            swordColliderController.StartDealDamage();
+        }
+        
+        Debug.Log("Boss Damage Window STARTED");
     }
 
     // Called by animation event to END damage window
     public void EndDamageWindow()
     {
         damageWindowActive = false;
-        hasDealtDamageThisWindow = false;
-        Debug.Log("Damage Window ENDED");
+        hasDealtDamage.Clear();
+        
+        // Disable sword collider
+        if (swordColliderController != null)
+        {
+            swordColliderController.EndDealDamage();
+        }
+        
+        Debug.Log("Boss Damage Window ENDED");
     }
 
     // Set combo level for this attack
@@ -77,25 +91,25 @@ public class BossDamageDealer : MonoBehaviour
 
     private void CheckAndDealDamage()
     {
-        // Find player in damage radius
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, damageRadius, playerLayer);
+        RaycastHit hit;
         
-        foreach (Collider hitCollider in hitColliders)
+        // Use raycast like player damage dealers
+        if (Physics.Raycast(transform.position, -transform.up, out hit, weaponLength, playerLayer))
         {
-            HealthSystem playerHealth = hitCollider.GetComponent<HealthSystem>();
-            if (playerHealth != null && !hasDealtDamageThisWindow)
+            // Check if we already hit this target
+            if (hasDealtDamage.Contains(hit.transform.gameObject)) return;
+
+            // Check for player HealthSystem
+            if (hit.transform.TryGetComponent(out HealthSystem playerHealth))
             {
-                DealDamageToPlayer(playerHealth, hitCollider.transform);
-                break; // Only hit one player per window
+                DealDamageToPlayer(playerHealth, hit);
+                hasDealtDamage.Add(hit.transform.gameObject);
             }
         }
     }
 
-    private void DealDamageToPlayer(HealthSystem playerHealth, Transform playerTransform)
+    private void DealDamageToPlayer(HealthSystem playerHealth, RaycastHit hit)
     {
-        hasDealtDamageThisWindow = true;
-        damageCooldownTimer = damageCooldown;
-
         // Calculate final damage
         float baseDamage = bossEnemy != null && bossEnemy.IsInRageMode ? rageDamage : damage;
         float comboMult = 1f + (currentCombo - 1) * comboMultiplier;
@@ -103,9 +117,16 @@ public class BossDamageDealer : MonoBehaviour
 
         // Apply damage
         playerHealth.TakeDamage(finalDamage);
+        playerHealth.HitVFX(hit.point);
+
+        // Check if this damage killed the player and trigger victory emote
+        if (playerHealth.CurrentHealth <= 0 && bossEnemy != null)
+        {
+            bossEnemy.TriggerVictoryEmote();
+        }
 
         // Show damage text
-        ShowDamageText(playerTransform.position, finalDamage);
+        ShowDamageText(hit.point, finalDamage);
 
         // Spawn VFX
         if (slashVFX != null && vfxSpawnPoint != null)
@@ -117,6 +138,12 @@ public class BossDamageDealer : MonoBehaviour
         if (hitSFX != null)
         {
             audioSource.PlayOneShot(hitSFX);
+        }
+
+        // Trigger time stop effect (boss attacks also trigger time stop)
+        if (TimeStopManager.Instance != null)
+        {
+            TimeStopManager.Instance.StopTime();
         }
 
         Debug.Log($"Boss dealt {finalDamage} damage (Combo: {currentCombo})");
@@ -134,9 +161,9 @@ public class BossDamageDealer : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmos()
     {
         Gizmos.color = damageWindowActive ? Color.green : Color.red;
-        Gizmos.DrawWireSphere(transform.position, damageRadius);
+        Gizmos.DrawLine(transform.position, transform.position - transform.up * weaponLength);
     }
 }
