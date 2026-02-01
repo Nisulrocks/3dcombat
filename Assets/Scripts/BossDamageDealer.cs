@@ -9,6 +9,10 @@ public class BossDamageDealer : MonoBehaviour
     [SerializeField] private float weaponLength = 2f;
     [SerializeField] private LayerMask playerLayer;
 
+    [Header("Multi-Raycast Settings")]
+    [SerializeField] private int rayCount = 5;
+    [SerializeField] private float spreadAngle = 60f; 
+
     [Header("Combo Settings")]
     [SerializeField] private float comboMultiplier = 0.25f; // 25% more per combo level
 
@@ -91,19 +95,23 @@ public class BossDamageDealer : MonoBehaviour
 
     private void CheckAndDealDamage()
     {
-        RaycastHit hit;
-        
-        // Use raycast like player damage dealers
-        if (Physics.Raycast(transform.position, -transform.up, out hit, weaponLength, playerLayer))
-        {
-            // Check if we already hit this target
-            if (hasDealtDamage.Contains(hit.transform.gameObject)) return;
+        float halfSpread = spreadAngle / 2f;
 
-            // Check for player HealthSystem
-            if (hit.transform.TryGetComponent(out HealthSystem playerHealth))
+        for (int i = 0; i < rayCount; i++)
+        {
+            float angle = rayCount == 1 ? 0f : Mathf.Lerp(-halfSpread, halfSpread, (float)i / (rayCount - 1));
+            Vector3 direction = Quaternion.AngleAxis(angle, transform.forward) * (-transform.up);
+
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position, direction, out hit, weaponLength, playerLayer))
             {
-                DealDamageToPlayer(playerHealth, hit);
-                hasDealtDamage.Add(hit.transform.gameObject);
+                if (hasDealtDamage.Contains(hit.transform.gameObject)) continue;
+
+                if (hit.transform.TryGetComponent(out HealthSystem playerHealth))
+                {
+                    DealDamageToPlayer(playerHealth, hit);
+                    hasDealtDamage.Add(hit.transform.gameObject);
+                }
             }
         }
     }
@@ -163,7 +171,14 @@ public class BossDamageDealer : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        float halfSpread = spreadAngle / 2f;
         Gizmos.color = damageWindowActive ? Color.green : Color.red;
-        Gizmos.DrawLine(transform.position, transform.position - transform.up * weaponLength);
+
+        for (int i = 0; i < rayCount; i++)
+        {
+            float angle = rayCount == 1 ? 0f : Mathf.Lerp(-halfSpread, halfSpread, (float)i / (rayCount - 1));
+            Vector3 direction = Quaternion.AngleAxis(angle, transform.forward) * (-transform.up);
+            Gizmos.DrawLine(transform.position, transform.position + direction * weaponLength);
+        }
     }
 }

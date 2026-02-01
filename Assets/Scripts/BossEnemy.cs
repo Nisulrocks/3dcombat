@@ -443,7 +443,13 @@ public class BossEnemy : MonoBehaviour
         if (distanceToPlayer > attackRange)
         {
             MoveTowards(player.transform.position, chaseSpeed);
+            animator.SetFloat("speed", 1f); // Walking
         }
+        else
+        {
+            animator.SetFloat("speed", 0f); // Idle when in attack range but cooling down
+        }
+        
         // Always face player
         RotateTowards(player.transform.position);
     }
@@ -1032,13 +1038,14 @@ public class BossEnemy : MonoBehaviour
         EndEmote();
         if (currentState == BossState.Emote)
         {
-            ChangeState(BossState.Chase);
+            ChangeState(BossState.Patrol);
         }
     }
 
     private void EndEmote()
     {
         Debug.Log("Boss: Emote animation ended");
+        animator.SetFloat("speed", 0f); // Reset speed to idle
     }
 
     // Called by animation event when emote ends
@@ -1047,7 +1054,8 @@ public class BossEnemy : MonoBehaviour
         EndEmote();
         if (currentState == BossState.Emote)
         {
-            ChangeState(BossState.Chase);
+            // Return to patrol after victory emote instead of chase
+            ChangeState(BossState.Patrol);
         }
     }
 

@@ -6126,6 +6126,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 776192264349440687, guid: 031e7e8775b4a1e4b8c42f49bf8a8480, type: 3}
+      propertyPath: ragdoll
+      value: 
+      objectReference: {fileID: 2033789575}
+    - target: {fileID: 776192264349440687, guid: 031e7e8775b4a1e4b8c42f49bf8a8480, type: 3}
       propertyPath: maxHealth
       value: 100
       objectReference: {fileID: 0}
@@ -6159,7 +6163,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 776192264349440687, guid: 031e7e8775b4a1e4b8c42f49bf8a8480, type: 3}
       propertyPath: rageHealthThreshold
-      value: 0.908
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 5041341798415542086, guid: 031e7e8775b4a1e4b8c42f49bf8a8480, type: 3}
       propertyPath: m_Name
@@ -13860,6 +13864,11 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &2033789575 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5041341798415542086, guid: 031e7e8775b4a1e4b8c42f49bf8a8480, type: 3}
+  m_PrefabInstance: {fileID: 1549359137}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2051802510
 GameObject:
   m_ObjectHideFlags: 0
@@ -14034,6 +14043,14 @@ PrefabInstance:
       propertyPath: freeLookCamera
       value: 
       objectReference: {fileID: 186237043}
+    - target: {fileID: 1695747800857798987, guid: c4575ab278af89a459fd5bcfe0cc47c1, type: 3}
+      propertyPath: health
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1695747800857798987, guid: c4575ab278af89a459fd5bcfe0cc47c1, type: 3}
+      propertyPath: maxHealth
+      value: 100
+      objectReference: {fileID: 0}
     - target: {fileID: 1763546761666267225, guid: c4575ab278af89a459fd5bcfe0cc47c1, type: 3}
       propertyPath: m_Camera
       value: 

@@ -237,7 +237,8 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 256
-  damageCooldown: 0.1
+  rayCount: 10
+  spreadAngle: 60
   comboMultiplier: 0.25
   slashVFX: {fileID: 0}
   vfxSpawnPoint: {fileID: 0}

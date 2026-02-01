@@ -2233,7 +2233,7 @@ CharacterController:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1024
   m_LayerOverridePriority: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
@@ -2275,18 +2275,32 @@ MonoBehaviour:
   rageDamage: 75
   comboTimeWindow: 0.5
   maxComboCount: 3
+  healThreshold1: 0.75
+  healThreshold2: 0.5
+  healDuration: 3
+  healPerSecond: 50
+  healCooldown: 15
+  shieldChance: 0.3
   shieldDuration: 3
   shieldCooldown: 5
-  shieldChance: 0.3
+  rageHealthThreshold: 0.3
+  rageChance: 0.5
   rageDuration: 10
   rageCooldown: 30
   rageDamageMultiplier: 3
   pushbackForce: 15
   pushbackRadius: 5
-  healDuration: 3
-  healAmount: 125
-  healThreshold1: 0.75
-  healThreshold2: 0.5
+  skeletonPrefab: {fileID: 0}
+  summonChance: 0.4
+  summonCooldown: 45
+  summonDuration: 2
+  summonCount: 3
+  summonRadius: 8
+  minSummonDistance: 3
+  summonVFX: {fileID: 0}
+  summonSFX: {fileID: 0}
+  emoteDuration: 3
+  emoteCooldown: 10
   combatTimeout: 60
   autoHealRate: 5
   sword: {fileID: 4489677676252728369, guid: b7e5af6f7b37cd8458432c288c319853, type: 3}
