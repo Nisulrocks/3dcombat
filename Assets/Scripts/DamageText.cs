@@ -19,7 +19,12 @@ public class DamageText : MonoBehaviour
     [SerializeField] Color blockedColor = Color.cyan; // Color for "BLOCKED" text
     [SerializeField] Color invincibleColor = Color.magenta; // Color for "INVINCIBLE" text
     [SerializeField] Color superColor = new Color(1f, 0.5f, 0f); // Orange color for "SUPER!" text
+    [SerializeField] Color rageColor = new Color(0.8f, 0f, 0f); // Dark red for "RAGE!" text
+    [SerializeField] Color rageDamageColor = new Color(1f, 1f, 0f); // Yellow for rage damage
+    [SerializeField] Color healColor = new Color(0f, 0.8f, 0.2f); // Green for "HEAL!" text
+    [SerializeField] Color summonColor = Color.black; // Black for summon text
     [SerializeField] float popupScaleMultiplier = 1.2f; // Much smaller scale
+    [SerializeField] float ragePopupScaleMultiplier = 1.8f; // Larger scale for rage damage
     [SerializeField] AnimationCurve popupCurve;
     
     private Vector3 velocity;
@@ -72,6 +77,96 @@ public class DamageText : MonoBehaviour
         DamageText damageText = pool.GetDamageText();
         damageText.transform.position = position;
         damageText.SetupInvincible();
+    }
+
+    public static void CreateRageText(Vector3 position)
+    {
+        // Find or create damage text pool
+        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        if (pool == null)
+        {
+            GameObject poolObj = new GameObject("DamageTextPool");
+            pool = poolObj.AddComponent<DamageTextPool>();
+        }
+        
+        DamageText damageText = pool.GetDamageText();
+        damageText.transform.position = position;
+        damageText.SetupRage();
+    }
+
+    public static void CreateRageDamageText(Vector3 position, float damage)
+    {
+        // Find or create damage text pool
+        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        if (pool == null)
+        {
+            GameObject poolObj = new GameObject("DamageTextPool");
+            pool = poolObj.AddComponent<DamageTextPool>();
+        }
+        
+        DamageText damageText = pool.GetDamageText();
+        damageText.transform.position = position;
+        damageText.SetupRageDamage(damage);
+    }
+
+    public static void CreateBlockedText(Vector3 position)
+    {
+        // Find or create damage text pool
+        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        if (pool == null)
+        {
+            GameObject poolObj = new GameObject("DamageTextPool");
+            pool = poolObj.AddComponent<DamageTextPool>();
+        }
+        
+        DamageText damageText = pool.GetDamageText();
+        damageText.transform.position = position;
+        damageText.SetupBlocked();
+    }
+
+    public static void CreateHealText(Vector3 position)
+    {
+        // Find or create damage text pool
+        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        if (pool == null)
+        {
+            GameObject poolObj = new GameObject("DamageTextPool");
+            pool = poolObj.AddComponent<DamageTextPool>();
+        }
+        
+        DamageText damageText = pool.GetDamageText();
+        damageText.transform.position = position;
+        damageText.SetupHeal();
+    }
+
+    public static void CreateSummonText(Vector3 position)
+    {
+        // Find or create damage text pool
+        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        if (pool == null)
+        {
+            GameObject poolObj = new GameObject("DamageTextPool");
+            pool = poolObj.AddComponent<DamageTextPool>();
+        }
+        
+        DamageText damageText = pool.GetDamageText();
+        damageText.transform.position = position;
+        damageText.SetupSummon();
+    }
+
+    public static void CreateSummonWordText(Vector3 position, string word)
+    {
+        // Find or create damage text pool
+        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        if (pool == null)
+        {
+            GameObject poolObj = new GameObject("DamageTextPool");
+            pool = poolObj.AddComponent<DamageTextPool>();
+        }
+        
+        DamageText damageText = pool.GetDamageText();
+        damageText.transform.position = position;
+        damageText.SetupSummonWord(word);
     }
     
     public void Setup(float damage, int comboLevel)
@@ -216,6 +311,264 @@ public class DamageText : MonoBehaviour
         StartCoroutine(LifetimeCoroutine());
         
         Debug.Log("DamageText INVINCIBLE setup complete");
+    }
+
+    public void SetupRage()
+    {
+        Debug.Log($"DamageText.SetupRage called");
+        
+        // Store original scale on first setup
+        if (originalScale == Vector3.zero)
+            originalScale = transform.localScale;
+        
+        if (textMesh == null)
+        {
+            Debug.LogError("TextMeshPro component not assigned!");
+            ReturnToPool();
+            return;
+        }
+        
+        // Set RAGE! text
+        textMesh.text = "RAGE!";
+        textMesh.color = rageColor;
+        
+        // Reset values
+        timeAlive = 0f;
+        isFading = false;
+        velocity = Vector3.zero;
+        
+        // Add random horizontal force
+        Vector3 randomHorizontal = new Vector3(
+            Random.Range(-randomHorizontalRange, randomHorizontalRange),
+            0,
+            Random.Range(-randomHorizontalRange, randomHorizontalRange)
+        );
+        
+        // Apply forces
+        velocity = Vector3.up * upwardForce + randomHorizontal;
+        
+        // Start popup animation with larger scale
+        StartCoroutine(PopupAnimation());
+        
+        // Start lifetime
+        StartCoroutine(LifetimeCoroutine());
+        
+        Debug.Log("DamageText RAGE setup complete");
+    }
+
+    public void SetupRageDamage(float damage)
+    {
+        Debug.Log($"DamageText.SetupRageDamage called - Damage: {damage}");
+        
+        // Store original scale on first setup
+        if (originalScale == Vector3.zero)
+            originalScale = transform.localScale;
+        
+        if (textMesh == null)
+        {
+            Debug.LogError("TextMeshPro component not assigned!");
+            ReturnToPool();
+            return;
+        }
+        
+        // Set RAGE! text with damage
+        textMesh.text = $"RAGE!\n{damage:F0}";
+        textMesh.color = rageDamageColor;
+        
+        // Reset values
+        timeAlive = 0f;
+        isFading = false;
+        velocity = Vector3.zero;
+        
+        // Add random horizontal force
+        Vector3 randomHorizontal = new Vector3(
+            Random.Range(-randomHorizontalRange, randomHorizontalRange),
+            0,
+            Random.Range(-randomHorizontalRange, randomHorizontalRange)
+        );
+        
+        // Apply forces
+        velocity = Vector3.up * upwardForce + randomHorizontal;
+        
+        // Start popup animation with rage scale
+        StartCoroutine(PopupAnimation());
+        
+        // Start lifetime
+        StartCoroutine(LifetimeCoroutine());
+        
+        Debug.Log("DamageText RAGE DAMAGE setup complete");
+    }
+
+    public void SetupBlocked()
+    {
+        Debug.Log($"DamageText.SetupBlocked called");
+        
+        // Store original scale on first setup
+        if (originalScale == Vector3.zero)
+            originalScale = transform.localScale;
+        
+        if (textMesh == null)
+        {
+            Debug.LogError("TextMeshPro component not assigned!");
+            ReturnToPool();
+            return;
+        }
+        
+        // Set BLOCKED text
+        textMesh.text = "BLOCKED";
+        textMesh.color = blockedColor;
+        
+        // Reset values
+        timeAlive = 0f;
+        isFading = false;
+        velocity = Vector3.zero;
+        
+        // Add random horizontal force
+        Vector3 randomHorizontal = new Vector3(
+            Random.Range(-randomHorizontalRange, randomHorizontalRange),
+            0,
+            Random.Range(-randomHorizontalRange, randomHorizontalRange)
+        );
+        
+        // Apply forces
+        velocity = Vector3.up * upwardForce + randomHorizontal;
+        
+        // Start popup animation
+        StartCoroutine(PopupAnimation());
+        
+        // Start lifetime
+        StartCoroutine(LifetimeCoroutine());
+        
+        Debug.Log("DamageText BLOCKED setup complete");
+    }
+
+    public void SetupHeal()
+    {
+        Debug.Log($"DamageText.SetupHeal called");
+        
+        // Store original scale on first setup
+        if (originalScale == Vector3.zero)
+            originalScale = transform.localScale;
+        
+        if (textMesh == null)
+        {
+            Debug.LogError("TextMeshPro component not assigned!");
+            ReturnToPool();
+            return;
+        }
+        
+        // Set HEAL! text
+        textMesh.text = "HEAL!";
+        textMesh.color = healColor;
+        
+        // Reset values
+        timeAlive = 0f;
+        isFading = false;
+        velocity = Vector3.zero;
+        
+        // Add random horizontal force
+        Vector3 randomHorizontal = new Vector3(
+            Random.Range(-randomHorizontalRange, randomHorizontalRange),
+            0,
+            Random.Range(-randomHorizontalRange, randomHorizontalRange)
+        );
+        
+        // Apply forces
+        velocity = Vector3.up * upwardForce + randomHorizontal;
+        
+        // Start popup animation
+        StartCoroutine(PopupAnimation());
+        
+        // Start lifetime
+        StartCoroutine(LifetimeCoroutine());
+        
+        Debug.Log("DamageText HEAL setup complete");
+    }
+
+    public void SetupSummon()
+    {
+        Debug.Log($"DamageText.SetupSummon called");
+        
+        // Store original scale on first setup
+        if (originalScale == Vector3.zero)
+            originalScale = transform.localScale;
+        
+        if (textMesh == null)
+        {
+            Debug.LogError("TextMeshPro component not assigned!");
+            ReturnToPool();
+            return;
+        }
+        
+        // Set SUMMONED text (3 lines)
+        textMesh.text = "SUMMONED\nUNDEAD\nSKELEARMY!";
+        textMesh.color = summonColor;
+        
+        // Reset values
+        timeAlive = 0f;
+        isFading = false;
+        velocity = Vector3.zero;
+        
+        // Add random horizontal force
+        Vector3 randomHorizontal = new Vector3(
+            Random.Range(-randomHorizontalRange, randomHorizontalRange),
+            0,
+            Random.Range(-randomHorizontalRange, randomHorizontalRange)
+        );
+        
+        // Apply forces
+        velocity = Vector3.up * upwardForce + randomHorizontal;
+        
+        // Start popup animation
+        StartCoroutine(PopupAnimation());
+        
+        // Start lifetime
+        StartCoroutine(LifetimeCoroutine());
+        
+        Debug.Log("DamageText SUMMON setup complete");
+    }
+
+    public void SetupSummonWord(string word)
+    {
+        Debug.Log($"DamageText.SetupSummonWord called - Word: {word}");
+        
+        // Store original scale on first setup
+        if (originalScale == Vector3.zero)
+            originalScale = transform.localScale;
+        
+        if (textMesh == null)
+        {
+            Debug.LogError("TextMeshPro component not assigned!");
+            ReturnToPool();
+            return;
+        }
+        
+        // Set individual word text
+        textMesh.text = word;
+        textMesh.color = summonColor;
+        
+        // Reset values
+        timeAlive = 0f;
+        isFading = false;
+        velocity = Vector3.zero;
+        
+        // Add random horizontal force
+        Vector3 randomHorizontal = new Vector3(
+            Random.Range(-randomHorizontalRange, randomHorizontalRange),
+            0,
+            Random.Range(-randomHorizontalRange, randomHorizontalRange)
+        );
+        
+        // Apply forces
+        velocity = Vector3.up * upwardForce + randomHorizontal;
+        
+        // Start popup animation
+        StartCoroutine(PopupAnimation());
+        
+        // Start lifetime
+        StartCoroutine(LifetimeCoroutine());
+        
+        Debug.Log($"DamageText SUMMON WORD '{word}' setup complete");
     }
     
     private IEnumerator PopupAnimation()

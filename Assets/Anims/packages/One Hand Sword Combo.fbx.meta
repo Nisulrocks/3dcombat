@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: f3e919f3564be624ebd821308b439692
+guid: c276110f37a331845bf9fd99d1b94563
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -31,11 +31,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Summon
+      name: Boss combo 1
       takeName: mixamo.com
       internalID: -203655887218126122
       firstFrame: 0
-      lastFrame: 31
+      lastFrame: 80
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -55,12 +55,26 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.8902439
-        functionName: EndSummonEvent
+      - time: 0.13821137
+        functionName: StartDamageWindow
         data: 
-        objectReferenceParameter: {instanceID: 0}
+        objectReferenceParameter: {fileID: 4489677676252728369, guid: b7e5af6f7b37cd8458432c288c319853, type: 3}
         floatParameter: 0
         intParameter: 0
+        messageOptions: 0
+      - time: 0.13821137
+        functionName: SetComboLevel
+        data: 
+        objectReferenceParameter: {fileID: 4489677676252728369, guid: b7e5af6f7b37cd8458432c288c319853, type: 3}
+        floatParameter: 0
+        intParameter: 2
+        messageOptions: 0
+      - time: 0.87398374
+        functionName: EndDamageWindow
+        data: 
+        objectReferenceParameter: {fileID: 4489677676252728369, guid: b7e5af6f7b37cd8458432c288c319853, type: 3}
+        floatParameter: 0
+        intParameter: 2
         messageOptions: 0
       transformMask: []
       maskType: 3

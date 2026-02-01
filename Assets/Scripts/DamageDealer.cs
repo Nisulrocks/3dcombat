@@ -24,61 +24,123 @@ public class DamageDealer : MonoBehaviour
             int layerMask = 1 << 9;
             if (Physics.Raycast(transform.position, -transform.up, out hit, weaponLength, layerMask))
             {
+                // Check for regular Enemy
                 if (hit.transform.TryGetComponent(out Enemy enemy) && !hasDealtDamage.Contains(hit.transform.gameObject))
                 {
-                    // Check if super is active
-                    bool isSuperActive = SuperSystem.Instance != null && SuperSystem.Instance.IsSuperActive;
-                    
-                    // Calculate damage with combo multiplier
-                    float comboMultiplier = 1f;
-                    int comboLevel = 0;
-                    if (ComboManager.Instance != null && !isSuperActive)
-                    {
-                        comboMultiplier = ComboManager.Instance.GetDamageMultiplier();
-                        comboLevel = ComboManager.Instance.GetCurrentCombo();
-                        ComboManager.Instance.RegisterHit();
-                    }
-                    
-                    // Apply super damage multiplier if active
-                    float superMultiplier = 1f;
-                    if (isSuperActive && SuperSystem.Instance != null)
-                    {
-                        superMultiplier = SuperSystem.Instance.SuperDamageMultiplier;
-                    }
-                    
-                    float finalDamage = weaponDamage * comboMultiplier * superMultiplier;
-                    enemy.TakeDamage(finalDamage);
-                    enemy.HitVFX(hit.point);
-                    hasDealtDamage.Add(hit.transform.gameObject);
-                    
-                    // Spawn damage text at hit position
-                    if (isSuperActive)
-                    {
-                        DamageText.CreateSuperDamageText(hit.point, finalDamage);
-                    }
-                    else
-                    {
-                        DamageText.CreateDamageText(hit.point, finalDamage, comboLevel);
-                    }
-                    
-                    // Add super charge on hit (only if not in super mode)
-                    if (!isSuperActive && SuperSystem.Instance != null)
-                    {
-                        SuperSystem.Instance.AddChargeFromHit();
-                    }
-                    
-                    // Trigger time stop effect (only for normal attacks, super has its own time control)
-                    if (!isSuperActive && TimeStopManager.Instance != null)
-                    {
-                        TimeStopManager.Instance.StopTime();
-                    }
-                    
-                    Debug.Log($"Damage dealt: {finalDamage} (Base: {weaponDamage} x Combo: {comboMultiplier} x Super: {superMultiplier})");
+                    DealDamageToEnemy(enemy, hit);
+                }
+                // Check for BossEnemy
+                else if (hit.transform.TryGetComponent(out BossEnemy bossEnemy) && !hasDealtDamage.Contains(hit.transform.gameObject))
+                {
+                    DealDamageToBoss(bossEnemy, hit);
                 }
             }
         }
     }
-    
+
+    void DealDamageToEnemy(Enemy enemy, RaycastHit hit)
+    {
+        // Check if super is active
+        bool isSuperActive = SuperSystem.Instance != null && SuperSystem.Instance.IsSuperActive;
+        
+        // Calculate damage with combo multiplier
+        float comboMultiplier = 1f;
+        int comboLevel = 0;
+        if (ComboManager.Instance != null && !isSuperActive)
+        {
+            comboMultiplier = ComboManager.Instance.GetDamageMultiplier();
+            comboLevel = ComboManager.Instance.GetCurrentCombo();
+            ComboManager.Instance.RegisterHit();
+        }
+        
+        // Apply super damage multiplier if active
+        float superMultiplier = 1f;
+        if (isSuperActive && SuperSystem.Instance != null)
+        {
+            superMultiplier = SuperSystem.Instance.SuperDamageMultiplier;
+        }
+        
+        float finalDamage = weaponDamage * comboMultiplier * superMultiplier;
+        enemy.TakeDamage(finalDamage);
+        enemy.HitVFX(hit.point);
+        hasDealtDamage.Add(hit.transform.gameObject);
+        
+        // Spawn damage text at hit position
+        if (isSuperActive)
+        {
+            DamageText.CreateSuperDamageText(hit.point, finalDamage);
+        }
+        else
+        {
+            DamageText.CreateDamageText(hit.point, finalDamage, comboLevel);
+        }
+        
+        // Add super charge on hit (only if not in super mode)
+        if (!isSuperActive && SuperSystem.Instance != null)
+        {
+            SuperSystem.Instance.AddChargeFromHit();
+        }
+        
+        // Trigger time stop effect (only for normal attacks, super has its own time control)
+        if (!isSuperActive && TimeStopManager.Instance != null)
+        {
+            TimeStopManager.Instance.StopTime();
+        }
+        
+        Debug.Log($"Damage dealt: {finalDamage} (Base: {weaponDamage} x Combo: {comboMultiplier} x Super: {superMultiplier})");
+    }
+
+    void DealDamageToBoss(BossEnemy bossEnemy, RaycastHit hit)
+    {
+        // Check if super is active
+        bool isSuperActive = SuperSystem.Instance != null && SuperSystem.Instance.IsSuperActive;
+        
+        // Calculate damage with combo multiplier
+        float comboMultiplier = 1f;
+        int comboLevel = 0;
+        if (ComboManager.Instance != null && !isSuperActive)
+        {
+            comboMultiplier = ComboManager.Instance.GetDamageMultiplier();
+            comboLevel = ComboManager.Instance.GetCurrentCombo();
+            ComboManager.Instance.RegisterHit();
+        }
+        
+        // Apply super damage multiplier if active
+        float superMultiplier = 1f;
+        if (isSuperActive && SuperSystem.Instance != null)
+        {
+            superMultiplier = SuperSystem.Instance.SuperDamageMultiplier;
+        }
+        
+        float finalDamage = weaponDamage * comboMultiplier * superMultiplier;
+        bossEnemy.TakeDamage(finalDamage);
+        hasDealtDamage.Add(hit.transform.gameObject);
+        
+        // Spawn damage text at hit position
+        if (isSuperActive)
+        {
+            DamageText.CreateSuperDamageText(hit.point, finalDamage);
+        }
+        else
+        {
+            DamageText.CreateDamageText(hit.point, finalDamage, comboLevel);
+        }
+        
+        // Add super charge on hit (only if not in super mode)
+        if (!isSuperActive && SuperSystem.Instance != null)
+        {
+            SuperSystem.Instance.AddChargeFromHit();
+        }
+        
+        // Trigger time stop effect
+        if (!isSuperActive && TimeStopManager.Instance != null)
+        {
+            TimeStopManager.Instance.StopTime();
+        }
+        
+        Debug.Log($"Damage dealt to BOSS: {finalDamage}");
+    }
+
     public void StartDealDamage()
     {
         canDealDamage = true;
