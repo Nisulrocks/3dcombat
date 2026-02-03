@@ -76,7 +76,14 @@ public class StandingState: State
         base.LogicUpdate();
  
         character.animator.SetFloat("speed", input.magnitude, character.speedDampTime, Time.deltaTime);
- 
+
+        // Check for ladder and transition to climbing
+        if (ClimbingState.CanStartClimbing(character) && input.y > 0.1f)
+        {
+            stateMachine.ChangeState(character.climbing);
+            return;
+        }
+
         if (sprint)
         {
             stateMachine.ChangeState(character.sprinting);

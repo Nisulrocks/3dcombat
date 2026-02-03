@@ -35,6 +35,12 @@ public class Character : MonoBehaviour
     [SerializeField] private float groundRadius; 
     [SerializeField] private LayerMask whatIsGround; 
     [SerializeField] private bool isGrounded;
+
+    [Header("Climbing Settings")]
+    public float climbSpeed = 3f;
+    public LayerMask ladderLayer;
+    public float ladderDetectionDistance = 1f;
+    public LayerMask groundLayer; // Used for platform detection when climbing
  
     public StateMachine movementSM;
     public StandingState standing;
@@ -46,6 +52,7 @@ public class Character : MonoBehaviour
     public CombatState combatting;
     public AttackState attacking;
     public SuperAttackState superAttacking;
+    public ClimbingState climbing;
  
     [HideInInspector]
     public float gravityValue = -9.81f;
@@ -84,6 +91,7 @@ public class Character : MonoBehaviour
         combatting = new CombatState(this, movementSM);
         attacking = new AttackState(this, movementSM);
         superAttacking = new SuperAttackState(this, movementSM);
+        climbing = new ClimbingState(this, movementSM);
 
         movementSM.Initialize(standing);
 
