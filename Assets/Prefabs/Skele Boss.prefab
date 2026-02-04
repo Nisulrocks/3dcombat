@@ -2264,6 +2264,14 @@ MonoBehaviour:
   chaseSpeed: 5
   rotationSpeed: 5
   stoppingDistance: 2
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 640
+  avoidanceDistance: 3
+  avoidanceAngle: 45
+  avoidanceStrength: 2
+  avoidanceRays: 5
+  showDebugRays: 1
   patrolRadius: 10
   patrolPointChangeInterval: 3
   activationRadius: 15
@@ -2290,7 +2298,7 @@ MonoBehaviour:
   rageDamageMultiplier: 3
   pushbackForce: 15
   pushbackRadius: 5
-  skeletonPrefab: {fileID: 0}
+  skeletonPrefab: {fileID: 5041341798415542086, guid: 49804cd5e2f76f14b9fe33781fc1a951, type: 3}
   summonChance: 0.4
   summonCooldown: 45
   summonDuration: 2

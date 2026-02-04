@@ -32,6 +32,14 @@ public class BossEnemy : MonoBehaviour
     [SerializeField] private float rotationSpeed = 5f;
     [SerializeField] private float stoppingDistance = 2f;
 
+    [Header("Obstacle Avoidance")]
+    [SerializeField] private LayerMask obstacleLayer;
+    [SerializeField] private float avoidanceDistance = 3f;
+    [SerializeField] private float avoidanceAngle = 45f;
+    [SerializeField] private float avoidanceStrength = 2f;
+    [SerializeField] private int avoidanceRays = 5;
+    [SerializeField] private bool showDebugRays = false;
+
     [Header("Patrol Settings")]
     [SerializeField] private float patrolRadius = 10f;
     [SerializeField] private float patrolPointChangeInterval = 3f;
@@ -450,7 +458,7 @@ public class BossEnemy : MonoBehaviour
             animator.SetFloat("speed", 0f); // Idle when in attack range but cooling down
         }
         
-        // Always face player
+        // Always face player (like Enemy.cs - rotation separate from movement)
         RotateTowards(player.transform.position);
     }
 
@@ -539,14 +547,69 @@ public class BossEnemy : MonoBehaviour
         Vector3 direction = (target - transform.position).normalized;
         direction.y = 0;
         
+        // Detect obstacles and calculate avoidance
+        Vector3 avoidance = ApplyObstacleAvoidance(direction);
+        
+        // Combine desired direction with obstacle avoidance for movement only
+        Vector3 desiredDirection = direction + avoidance;
+        desiredDirection.y = 0;
+        desiredDirection.Normalize();
+        
         if (characterController != null)
         {
-            characterController.Move(direction * speed * Time.deltaTime);
+            characterController.Move(desiredDirection * speed * Time.deltaTime);
         }
         else
         {
-            transform.position += direction * speed * Time.deltaTime;
+            transform.position += desiredDirection * speed * Time.deltaTime;
         }
+    }
+    
+    // Apply obstacle avoidance to movement direction (following Enemy.cs pattern)
+    private Vector3 ApplyObstacleAvoidance(Vector3 desiredDirection)
+    {
+        Vector3 avoidanceVector = Vector3.zero;
+        Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
+
+        // Multi-ray obstacle detection in a cone pattern
+        for (int i = 0; i < avoidanceRays; i++)
+        {
+            float angle = -avoidanceAngle / 2 + (avoidanceAngle / (avoidanceRays - 1)) * i;
+            Vector3 rayDirection = Quaternion.Euler(0, angle, 0) * desiredDirection;
+
+            RaycastHit hit;
+            if (Physics.Raycast(rayOrigin, rayDirection, out hit, avoidanceDistance, obstacleLayer))
+            {
+                // Calculate avoidance force based on distance
+                float distanceFactor = 1 - (hit.distance / avoidanceDistance);
+                
+                // Calculate perpendicular avoidance direction (slide along walls)
+                Vector3 avoidDirection = Vector3.Cross(hit.normal, Vector3.up).normalized;
+                
+                // Choose direction that moves away from obstacle
+                if (Vector3.Dot(avoidDirection, transform.right) < 0)
+                {
+                    avoidDirection = -avoidDirection;
+                }
+
+                avoidanceVector += avoidDirection * distanceFactor * avoidanceStrength;
+
+                if (showDebugRays)
+                {
+                    Debug.DrawRay(rayOrigin, rayDirection * hit.distance, Color.red);
+                    Debug.DrawRay(hit.point, avoidDirection * 2f, Color.yellow);
+                }
+            }
+            else
+            {
+                if (showDebugRays)
+                {
+                    Debug.DrawRay(rayOrigin, rayDirection * avoidanceDistance, Color.green);
+                }
+            }
+        }
+
+        return avoidanceVector;
     }
 
     private void RotateTowards(Vector3 target)

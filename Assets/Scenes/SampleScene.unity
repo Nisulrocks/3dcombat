@@ -7228,6 +7228,10 @@ PrefabInstance:
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 776192264349440687, guid: 031e7e8775b4a1e4b8c42f49bf8a8480, type: 3}
+      propertyPath: avoidanceDistance
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 776192264349440687, guid: 031e7e8775b4a1e4b8c42f49bf8a8480, type: 3}
       propertyPath: rageHealthThreshold
       value: 0.5
       objectReference: {fileID: 0}
