@@ -22,6 +22,16 @@ public class ClimbingState : State
         character = _character;
         stateMachine = _stateMachine;
     }
+    
+    // Reset state for respawn
+    public void ResetState()
+    {
+        hasEnteredState = false;
+        currentLadder = null;
+        verticalInput = 0f;
+        jumpPressed = false;
+        Debug.Log("ClimbingState: Reset for respawn");
+    }
 
     public override void Enter()
     {
@@ -49,6 +59,10 @@ public class ClimbingState : State
         
         // DISABLE ROOT MOTION so we control movement via code
         character.animator.applyRootMotion = false;
+        
+        // Reset any lingering animator states
+        character.animator.SetBool("isClimbing", false);
+        character.animator.SetFloat("climbSpeed", 0f);
         
         // Set climbing animation state ONLY ONCE
         if (!hasEnteredState)
@@ -272,11 +286,17 @@ public class ClimbingState : State
         Vector3 rayOrigin = character.transform.position + Vector3.up * 1f;
         Vector3 rayDirection = character.transform.forward;
         
+        Debug.Log($"Checking for ladder - Origin: {rayOrigin}, Direction: {rayDirection}, Distance: {character.ladderDetectionDistance}, Layer: {character.ladderLayer}");
+        
         if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit hit, character.ladderDetectionDistance, character.ladderLayer))
         {
+            Debug.Log($"Ladder found: {hit.transform.name} at {hit.point}");
             return true;
         }
-        
-        return false;
+        else
+        {
+            Debug.Log("No ladder detected");
+            return false;
+        }
     }
 }

@@ -1875,6 +1875,14 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 136
   isGrounded: 0
+  climbSpeed: 0.5
+  ladderLayer:
+    serializedVersion: 2
+    m_Bits: 2048
+  ladderDetectionDistance: 0.5
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
   gravityValue: -9.81
   normalColliderHeight: 0
   controller: {fileID: 0}

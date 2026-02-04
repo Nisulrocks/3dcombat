@@ -2259,7 +2259,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy
   maxHealth: 500
   currentHealth: 0
-  ragdoll: {fileID: 0}
+  ragdoll: {fileID: 3067614561482052101, guid: c4167382752636e46a07b4ddc544734d, type: 3}
   patrolSpeed: 2
   chaseSpeed: 5
   rotationSpeed: 5

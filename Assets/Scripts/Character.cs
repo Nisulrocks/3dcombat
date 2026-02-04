@@ -100,6 +100,18 @@ public class Character : MonoBehaviour
         
         // Initialize stamina
         currentStamina = maxStamina;
+        
+        // Reset climbing state for new player
+        ResetClimbingState();
+    }
+    
+    // Reset climbing state (called on respawn)
+    public void ResetClimbingState()
+    {
+        if (climbing != null)
+        {
+            climbing.ResetState();
+        }
     }
 
     private void LockCursor()
