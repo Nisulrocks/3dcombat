@@ -1,6 +1,6 @@
 using System.Collections;
 using UnityEngine;
- 
+
 public class StandingState: State
 {  
     float gravityValue;
@@ -12,9 +12,11 @@ public class StandingState: State
     float playerSpeed;
     bool drawWeapon;
     float timePassed; // Add timer for animation sequencing
- 
+    float footstepTimer; // Timer for footstep sounds
+    float footstepInterval = 0.5f; // Time between footsteps
+
     Vector3 cVelocity;
- 
+
     public StandingState(Character _character, StateMachine _stateMachine) : base(_character, _stateMachine)
     {
         character = _character;
@@ -31,6 +33,7 @@ public class StandingState: State
         drawWeapon = false;
         input = Vector2.zero;
         timePassed = 0f; // Initialize timer
+        footstepTimer = 0f; // Initialize footstep timer
         
         currentVelocity = Vector3.zero;
         gravityVelocity.y = 0;
@@ -131,6 +134,24 @@ public class StandingState: State
         if (velocity.sqrMagnitude>0)
         {
             character.transform.rotation = Quaternion.Slerp(character.transform.rotation, Quaternion.LookRotation(velocity),character.rotationDampTime);
+            
+            // Handle footstep sounds
+            footstepTimer += Time.deltaTime;
+            float currentFootstepInterval = sprint ? footstepInterval * 0.7f : footstepInterval; // Faster footsteps when sprinting
+            
+            if (footstepTimer >= currentFootstepInterval && grounded)
+            {
+                footstepTimer = 0f;
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlayFootstepSound();
+                }
+            }
+        }
+        else
+        {
+            // Reset timer when not moving
+            footstepTimer = 0f;
         }
         
     }

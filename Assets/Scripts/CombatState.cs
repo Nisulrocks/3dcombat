@@ -27,7 +27,7 @@ public class CombatState : State
         input = Vector2.zero;
         currentVelocity = Vector3.zero;
         gravityVelocity.y = 0;
-        attack = false;
+        attack = false; // Reset attack flag
         block = false;
         superActivate = false;
         timePassed = 0f;
@@ -36,6 +36,9 @@ public class CombatState : State
         playerSpeed = character.playerSpeed;
         grounded = character.controller.isGrounded;
         gravityValue = character.gravityValue;
+        
+        // Clear any attack input that might be carried over
+        attackAction.Reset();
     }
  
     public override void HandleInput()
