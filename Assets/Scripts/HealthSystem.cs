@@ -55,6 +55,12 @@ public class HealthSystem : MonoBehaviour
         animator.SetTrigger("damage");
         //CameraShake.Instance.ShakeCamera(2f, 0.2f);
 
+        // Trigger damage flash effect
+        if (DamageFlashEffect.Instance != null)
+        {
+            DamageFlashEffect.Instance.TriggerDamageFlash();
+        }
+
         // Reset combo when player takes damage
         if (ComboManager.Instance != null)
         {

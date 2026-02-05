@@ -117,14 +117,6 @@ public class ClimbingState : State
             return;
         }
         
-        // Check if reached top of ladder and there's a platform
-        if (HasReachedTopWithPlatform())
-        {
-            DismountAtTop();
-            ExitClimbing();
-            return;
-        }
-        
         // Check if reached bottom of ladder
         if (HasReachedBottom())
         {
@@ -211,35 +203,6 @@ public class ClimbingState : State
         return false;
     }
 
-    // Check if reached top of ladder AND there's a platform to stand on
-    private bool HasReachedTopWithPlatform()
-    {
-        if (currentLadder == null) return false;
-        if (verticalInput <= 0) return false; // Only check when climbing up
-        
-        // Get ladder bounds
-        Collider ladderCollider = currentLadder.GetComponent<Collider>();
-        if (ladderCollider == null) return false;
-        
-        Bounds bounds = ladderCollider.bounds;
-        float playerY = character.transform.position.y;
-        
-        // Check if near top of ladder
-        if (playerY < bounds.max.y - 1f) return false;
-        
-        // Raycast forward and down to check for platform (ground layer)
-        Vector3 rayOrigin = character.transform.position + Vector3.up * 1.5f + character.transform.forward * 0.5f;
-        
-        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, 3f, groundLayer))
-        {
-            // Found ground in front - there's a platform to dismount to
-            Debug.Log($"Platform detected at top: {hit.point}");
-            return true;
-        }
-        
-        return false;
-    }
-    
     // Check if reached bottom of ladder
     private bool HasReachedBottom()
     {
@@ -247,37 +210,7 @@ public class ClimbingState : State
         if (verticalInput >= 0) return false; // Only check when climbing down
         
         // Check if grounded
-        if (character.controller.isGrounded)
-        {
-            Debug.Log("Reached bottom of ladder - grounded");
-            return true;
-        }
-        
-        return false;
-    }
-    
-    // Move player forward and up when reaching top of ladder
-    private void DismountAtTop()
-    {
-        // Raycast to find exact platform position
-        Vector3 rayOrigin = character.transform.position + Vector3.up * 1.5f + character.transform.forward * dismountOffset;
-        
-        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, 3f, groundLayer))
-        {
-            // Move player to platform
-            Vector3 dismountPosition = hit.point + Vector3.up * 0.1f; // Slightly above ground
-            character.transform.position = dismountPosition;
-            Debug.Log($"Dismounted at top to platform: {dismountPosition}");
-        }
-        else
-        {
-            // Fallback - just move forward
-            Vector3 dismountPosition = character.transform.position;
-            dismountPosition += character.transform.forward * dismountOffset;
-            dismountPosition.y += 0.5f;
-            character.transform.position = dismountPosition;
-            Debug.Log($"Dismounted at top (fallback): {dismountPosition}");
-        }
+        return character.CheckGrounded();
     }
 
     // Static helper to check if player can start climbing (called from other states)
