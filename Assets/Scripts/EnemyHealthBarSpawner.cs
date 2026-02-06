@@ -37,7 +37,7 @@ public class EnemyHealthBarSpawner : MonoBehaviour
         Canvas canvasToUse = worldSpaceCanvas;
         if (canvasToUse == null)
         {
-            Canvas[] canvases = FindObjectsOfType<Canvas>();
+            Canvas[] canvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
             for (int i = 0; i < canvases.Length; i++)
             {
                 if (canvases[i].renderMode == RenderMode.WorldSpace)

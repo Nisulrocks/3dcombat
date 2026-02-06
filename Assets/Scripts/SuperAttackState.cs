@@ -5,7 +5,9 @@ public class SuperAttackState : State
     private float timePassed;
     private float clipLength;
     private float clipSpeed;
+    #pragma warning disable CS0414
     private bool hasTriggeredSuper;
+    #pragma warning restore CS0414
 
     public SuperAttackState(Character _character, StateMachine _stateMachine) : base(_character, _stateMachine)
     {

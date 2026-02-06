@@ -62,6 +62,12 @@ public class EnemyDamageDealer : MonoBehaviour
                     {
                         TimeStopManager.Instance.StopTime();
                     }
+
+                    // Trigger chromatic aberration effect on successful hit
+                    if (HitChromaticEffect.Instance != null)
+                    {
+                        HitChromaticEffect.Instance.TriggerHitChromatic();
+                    }
                 }
             }
         }

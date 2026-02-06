@@ -87,6 +87,12 @@ public class DamageDealer : MonoBehaviour
             TimeStopManager.Instance.StopTime();
         }
         
+        // Trigger chromatic aberration effect on successful hit
+        if (HitChromaticEffect.Instance != null)
+        {
+            HitChromaticEffect.Instance.TriggerHitChromatic();
+        }
+        
         Debug.Log($"Damage dealt: {finalDamage} (Base: {weaponDamage} x Combo: {comboMultiplier} x Super: {superMultiplier})");
     }
 
@@ -136,6 +142,12 @@ public class DamageDealer : MonoBehaviour
         if (!isSuperActive && TimeStopManager.Instance != null)
         {
             TimeStopManager.Instance.StopTime();
+        }
+        
+        // Trigger chromatic aberration effect on successful hit
+        if (HitChromaticEffect.Instance != null)
+        {
+            HitChromaticEffect.Instance.TriggerHitChromatic();
         }
         
         Debug.Log($"Damage dealt to BOSS: {finalDamage}");

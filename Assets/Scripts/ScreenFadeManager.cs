@@ -29,7 +29,7 @@ public class ScreenFadeManager : MonoBehaviour
         if (fadeImage == null)
         {
             // Create canvas and image if not assigned
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = FindFirstObjectByType<Canvas>();
             if (canvas == null)
             {
                 GameObject canvasObj = new GameObject("FadeCanvas");

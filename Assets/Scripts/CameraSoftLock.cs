@@ -42,14 +42,14 @@ public class CameraSoftLock : MonoBehaviour
         // Find free look camera if not assigned
         if (freeLookCamera == null)
         {
-            freeLookCamera = FindObjectOfType<CinemachineCamera>();
+            freeLookCamera = FindFirstObjectByType<CinemachineCamera>();
         }
         
         // Cache player reference (this component is on the player)
         cachedPlayer = GetComponent<Character>();
         if (cachedPlayer == null)
         {
-            cachedPlayer = FindObjectOfType<Character>();
+            cachedPlayer = FindFirstObjectByType<Character>();
         }
     }
 
@@ -94,7 +94,7 @@ public class CameraSoftLock : MonoBehaviour
         // Check if player is in combat state
         if (cachedPlayer == null)
         {
-            cachedPlayer = FindObjectOfType<Character>();
+            cachedPlayer = FindFirstObjectByType<Character>();
         }
         
         if (cachedPlayer != null)
@@ -215,7 +215,7 @@ public class CameraSoftLock : MonoBehaviour
 
         if (cachedPlayer == null)
         {
-            cachedPlayer = FindObjectOfType<Character>();
+            cachedPlayer = FindFirstObjectByType<Character>();
         }
         if (cachedPlayer == null) return;
 
@@ -270,7 +270,7 @@ public class CameraSoftLock : MonoBehaviour
 
         if (cachedPlayer == null)
         {
-            cachedPlayer = FindObjectOfType<Character>();
+            cachedPlayer = FindFirstObjectByType<Character>();
         }
         if (cachedPlayer == null) return;
 

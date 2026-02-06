@@ -55,12 +55,6 @@ public class HealthSystem : MonoBehaviour
         animator.SetTrigger("damage");
         //CameraShake.Instance.ShakeCamera(2f, 0.2f);
 
-        // Play damage sound
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayDamageSound();
-        }
-
         // Trigger damage flash effect
         if (DamageFlashEffect.Instance != null)
         {

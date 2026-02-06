@@ -24,7 +24,9 @@ public class DamageText : MonoBehaviour
     [SerializeField] Color healColor = new Color(0f, 0.8f, 0.2f); // Green for "HEAL!" text
     [SerializeField] Color summonColor = Color.black; // Black for summon text
     [SerializeField] float popupScaleMultiplier = 1.2f; // Much smaller scale
+    #pragma warning disable CS0414
     [SerializeField] float ragePopupScaleMultiplier = 1.8f; // Larger scale for rage damage
+    #pragma warning restore CS0414
     [SerializeField] AnimationCurve popupCurve;
     
     private Vector3 velocity;
@@ -35,7 +37,7 @@ public class DamageText : MonoBehaviour
     public static void CreateDamageText(Vector3 position, float damage, int comboLevel = 0)
     {
         // Find or create damage text pool
-        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        DamageTextPool pool = FindFirstObjectByType<DamageTextPool>();
         if (pool == null)
         {
             // Create pool if none exists
@@ -52,7 +54,7 @@ public class DamageText : MonoBehaviour
     public static void CreateSuperDamageText(Vector3 position, float damage)
     {
         // Find or create damage text pool
-        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        DamageTextPool pool = FindFirstObjectByType<DamageTextPool>();
         if (pool == null)
         {
             GameObject poolObj = new GameObject("DamageTextPool");
@@ -67,7 +69,7 @@ public class DamageText : MonoBehaviour
     public static void CreateInvincibleText(Vector3 position)
     {
         // Find or create damage text pool
-        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        DamageTextPool pool = FindFirstObjectByType<DamageTextPool>();
         if (pool == null)
         {
             GameObject poolObj = new GameObject("DamageTextPool");
@@ -82,7 +84,7 @@ public class DamageText : MonoBehaviour
     public static void CreateRageText(Vector3 position)
     {
         // Find or create damage text pool
-        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        DamageTextPool pool = FindFirstObjectByType<DamageTextPool>();
         if (pool == null)
         {
             GameObject poolObj = new GameObject("DamageTextPool");
@@ -97,7 +99,7 @@ public class DamageText : MonoBehaviour
     public static void CreateRageDamageText(Vector3 position, float damage)
     {
         // Find or create damage text pool
-        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        DamageTextPool pool = FindFirstObjectByType<DamageTextPool>();
         if (pool == null)
         {
             GameObject poolObj = new GameObject("DamageTextPool");
@@ -112,7 +114,7 @@ public class DamageText : MonoBehaviour
     public static void CreateBlockedText(Vector3 position)
     {
         // Find or create damage text pool
-        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        DamageTextPool pool = FindFirstObjectByType<DamageTextPool>();
         if (pool == null)
         {
             GameObject poolObj = new GameObject("DamageTextPool");
@@ -127,7 +129,7 @@ public class DamageText : MonoBehaviour
     public static void CreateHealText(Vector3 position)
     {
         // Find or create damage text pool
-        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        DamageTextPool pool = FindFirstObjectByType<DamageTextPool>();
         if (pool == null)
         {
             GameObject poolObj = new GameObject("DamageTextPool");
@@ -142,7 +144,7 @@ public class DamageText : MonoBehaviour
     public static void CreateSummonText(Vector3 position)
     {
         // Find or create damage text pool
-        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        DamageTextPool pool = FindFirstObjectByType<DamageTextPool>();
         if (pool == null)
         {
             GameObject poolObj = new GameObject("DamageTextPool");
@@ -157,7 +159,7 @@ public class DamageText : MonoBehaviour
     public static void CreateSummonWordText(Vector3 position, string word)
     {
         // Find or create damage text pool
-        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        DamageTextPool pool = FindFirstObjectByType<DamageTextPool>();
         if (pool == null)
         {
             GameObject poolObj = new GameObject("DamageTextPool");
@@ -639,7 +641,7 @@ public class DamageText : MonoBehaviour
     
     private void ReturnToPool()
     {
-        DamageTextPool pool = FindObjectOfType<DamageTextPool>();
+        DamageTextPool pool = FindFirstObjectByType<DamageTextPool>();
         if (pool != null)
         {
             pool.ReturnDamageText(this);

@@ -11,6 +11,8 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioSource bossBGMSource;
     [SerializeField] private float bgmFadeDuration = 2f;
     [SerializeField] private float bossDetectionRange = 20f;
+    [SerializeField] private float normalBGMVolume = 1f;
+    [SerializeField] private float bossBGMVolume = 1f;
 
     [Header("SFX Settings")]
     [SerializeField] private AudioSource sfxSource;
@@ -55,7 +57,7 @@ public class AudioManager : MonoBehaviour
         if (normalBGMSource != null)
         {
             normalBGMSource.Play();
-            normalBGMSource.volume = 1f;
+            normalBGMSource.volume = normalBGMVolume;
         }
 
         if (bossBGMSource != null)
@@ -121,13 +123,13 @@ public class AudioManager : MonoBehaviour
 
             if (normalBGMSource != null)
             {
-                float targetVolume = toBoss ? 0f : 1f;
+                float targetVolume = toBoss ? 0f : normalBGMVolume;
                 normalBGMSource.volume = Mathf.Lerp(startNormalVolume, targetVolume, normalizedTime);
             }
 
             if (bossBGMSource != null)
             {
-                float targetVolume = toBoss ? 1f : 0f;
+                float targetVolume = toBoss ? bossBGMVolume : 0f;
                 bossBGMSource.volume = Mathf.Lerp(startBossVolume, targetVolume, normalizedTime);
             }
 
@@ -137,12 +139,12 @@ public class AudioManager : MonoBehaviour
         // Ensure final values are set
         if (normalBGMSource != null)
         {
-            normalBGMSource.volume = toBoss ? 0f : 1f;
+            normalBGMSource.volume = toBoss ? 0f : normalBGMVolume;
         }
 
         if (bossBGMSource != null)
         {
-            bossBGMSource.volume = toBoss ? 1f : 0f;
+            bossBGMSource.volume = toBoss ? bossBGMVolume : 0f;
         }
 
         bgmFadeCoroutine = null;
@@ -180,23 +182,6 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    // Player SFX Methods
-    public void PlayFootstepSound()
-    {
-        // You can customize this to use specific footstep indices
-        PlaySFX(0); // Assuming index 0 is footstep
-    }
-
-    public void PlayJumpSound()
-    {
-        PlaySFX(1); // Assuming index 1 is jump
-    }
-
-    public void PlayDamageSound()
-    {
-        PlaySFX(2); // Assuming index 2 is damage
-    }
-
     // Utility Methods
     public void AddSFXClip(AudioClip clip)
     {
@@ -209,6 +194,45 @@ public class AudioManager : MonoBehaviour
     public void SetBossDetectionRange(float range)
     {
         bossDetectionRange = range;
+    }
+
+    // BGM Volume Control Methods
+    public void SetNormalBGMVolume(float volume)
+    {
+        normalBGMVolume = Mathf.Clamp01(volume);
+        
+        // Update current volume if normal BGM is currently playing
+        if (normalBGMSource != null && !isBossInRange)
+        {
+            normalBGMSource.volume = normalBGMVolume;
+        }
+    }
+
+    public void SetBossBGMVolume(float volume)
+    {
+        bossBGMVolume = Mathf.Clamp01(volume);
+        
+        // Update current volume if boss BGM is currently playing
+        if (bossBGMSource != null && isBossInRange)
+        {
+            bossBGMSource.volume = bossBGMVolume;
+        }
+    }
+
+    public float GetNormalBGMVolume()
+    {
+        return normalBGMVolume;
+    }
+
+    public float GetBossBGMVolume()
+    {
+        return bossBGMVolume;
+    }
+
+    public void SetBothBGMVolumes(float normalVolume, float bossVolume)
+    {
+        SetNormalBGMVolume(normalVolume);
+        SetBossBGMVolume(bossVolume);
     }
 
     private void OnDrawGizmosSelected()

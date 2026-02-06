@@ -2254,6 +2254,10 @@ MonoBehaviour:
     m_Bits: 128
   sideRayDistance: 1.5
   wallSlideSpeed: 2
+  attackSFX: {fileID: 8300000, guid: 5ac18934b39c1de4b85ade4fb8fee82c, type: 3}
+  damageSFX: {fileID: 8300000, guid: 3368ff04d0da54346a6776e63a56cb2e, type: 3}
+  deathSFX: {fileID: 8300000, guid: 29f15225ac7f21947909729699d680b3, type: 3}
+  alertSFX: {fileID: 8300000, guid: b6589c66c70cec447bdb6229a8559d6c, type: 3}
 --- !u!143 &6942330436117461256
 CharacterController:
   m_ObjectHideFlags: 0

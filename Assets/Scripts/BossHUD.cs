@@ -62,7 +62,7 @@ public class BossHUD : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player");
         
         // Find boss enemy
-        bossEnemy = FindObjectOfType<BossEnemy>();
+        bossEnemy = FindFirstObjectByType<BossEnemy>();
         if (bossEnemy == null)
         {
             Debug.LogWarning("BossHUD: No BossEnemy found in scene!");

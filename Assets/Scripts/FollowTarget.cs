@@ -32,9 +32,22 @@ public class FollowTarget : MonoBehaviour
     private Quaternion initialRotationOffset;
     private bool offsetsCalculated = false;
     private float lastCheckTime;
+    
+    // Cache the original position and rotation for respawn
+    private Vector3 originalPosition;
+    private Quaternion originalRotation;
+    private bool originalPositionCached = false;
 
     void Start()
     {
+        // Cache the original position and rotation
+        if (!originalPositionCached)
+        {
+            originalPosition = transform.position;
+            originalRotation = transform.rotation;
+            originalPositionCached = true;
+        }
+        
         // Calculate offsets when the game starts
         if (target != null)
         {
@@ -145,6 +158,39 @@ public class FollowTarget : MonoBehaviour
     }
     
     /// <summary>
+    /// Resets this object to its original cached position and rotation
+    /// </summary>
+    public void ResetToOriginalPosition()
+    {
+        if (originalPositionCached)
+        {
+            transform.position = originalPosition;
+            transform.rotation = originalRotation;
+            Debug.Log($"FollowTarget: Reset to original position {originalPosition}");
+        }
+        else
+        {
+            Debug.LogWarning("FollowTarget: Original position not cached, cannot reset");
+        }
+    }
+    
+    /// <summary>
+    /// Forces recalculation of offsets from current position (useful after manual position changes)
+    /// </summary>
+    public void ForceRecalculateOffsets()
+    {
+        if (target != null)
+        {
+            CalculateOffsets();
+            Debug.Log($"FollowTarget: Force recalculated offsets for target {target.name}");
+        }
+        else
+        {
+            Debug.LogWarning("FollowTarget: No target available for offset calculation");
+        }
+    }
+    
+    /// <summary>
     /// Tries to find the player GameObject when target is lost
     /// </summary>
     private void TryFindPlayer()
@@ -152,9 +198,16 @@ public class FollowTarget : MonoBehaviour
         GameObject player = GameObject.FindWithTag(playerTag);
         if (player != null)
         {
+            // First, return to original position before setting new target
+            if (originalPositionCached)
+            {
+                transform.position = originalPosition;
+                transform.rotation = originalRotation;
+            }
+            
             target = player.transform;
             offsetsCalculated = false; // Recalculate offsets for new target
-            Debug.Log($"FollowTarget: Found new player target: {player.name}");
+            Debug.Log($"FollowTarget: Found new player target: {player.name}, returned to original position");
         }
         else
         {

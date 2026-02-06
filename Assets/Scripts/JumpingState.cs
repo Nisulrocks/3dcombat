@@ -40,12 +40,6 @@ public class JumpingState:State
         {
             character.animator.SetTrigger("jump");
             Jump();
-            
-            // Play jump sound
-            if (AudioManager.Instance != null)
-            {
-                AudioManager.Instance.PlayJumpSound();
-            }
         }
         else
         {

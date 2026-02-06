@@ -35,7 +35,7 @@ public class DamageFlashEffect : MonoBehaviour
         // Get global volume if not assigned
         if (globalVolume == null)
         {
-            globalVolume = FindObjectOfType<Volume>();
+            globalVolume = FindFirstObjectByType<Volume>();
         }
 
         // Get volume profile and effects

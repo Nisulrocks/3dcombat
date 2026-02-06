@@ -118,6 +118,22 @@ public class BossDamageDealer : MonoBehaviour
 
     private void DealDamageToPlayer(HealthSystem playerHealth, RaycastHit hit)
     {
+        // Check if player has an active shield
+        ShieldSystem shieldSystem = hit.transform.GetComponent<ShieldSystem>();
+        if (shieldSystem != null && shieldSystem.CurrentShield != null)
+        {
+            // Shield blocked the attack!
+            Debug.Log("Boss attack blocked by player shield!");
+            
+            // Show "BLOCKED" damage text
+            DamageText.CreateDamageText(hit.point, 0, 0); // 0 damage, no combo
+            
+            // Optional: Play block effect/sound here
+            // Could add shield impact VFX or sound
+            
+            return; // Don't deal damage
+        }
+
         // Calculate final damage
         float baseDamage = bossEnemy != null && bossEnemy.IsInRageMode ? rageDamage : damage;
         float comboMult = 1f + (currentCombo - 1) * comboMultiplier;
@@ -143,15 +159,30 @@ public class BossDamageDealer : MonoBehaviour
         }
 
         // Play hit SFX
-        if (hitSFX != null)
+        AudioClip attackSFXToPlay = null;
+        if (bossEnemy != null)
         {
-            audioSource.PlayOneShot(hitSFX);
+            // Get attack SFX based on combo level
+            attackSFXToPlay = bossEnemy.GetAttackSFX(currentCombo);
+        }
+        
+        // Fallback to default hitSFX if no combo-specific SFX is available
+        AudioClip sfxToPlay = attackSFXToPlay != null ? attackSFXToPlay : hitSFX;
+        if (sfxToPlay != null)
+        {
+            audioSource.PlayOneShot(sfxToPlay);
         }
 
         // Trigger time stop effect (boss attacks also trigger time stop)
         if (TimeStopManager.Instance != null)
         {
             TimeStopManager.Instance.StopTime();
+        }
+
+        // Trigger chromatic aberration effect on successful hit
+        if (HitChromaticEffect.Instance != null)
+        {
+            HitChromaticEffect.Instance.TriggerHitChromatic();
         }
 
         Debug.Log($"Boss dealt {finalDamage} damage (Combo: {currentCombo})");

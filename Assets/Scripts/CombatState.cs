@@ -77,7 +77,16 @@ public class CombatState : State
     {
         base.LogicUpdate();
 
-        character.animator.SetFloat("speed", input.magnitude, character.speedDampTime, Time.deltaTime);
+        // Handle speed parameter properly - ensure it goes to 0 when not moving
+        float targetSpeed = input.magnitude;
+        
+        // If input is very small, treat as no input
+        if (targetSpeed < 0.1f)
+        {
+            targetSpeed = 0f;
+        }
+        
+        character.animator.SetFloat("speed", targetSpeed, character.speedDampTime, Time.deltaTime);
 
         if (sheathWeapon)
         {
@@ -160,21 +169,29 @@ public class CombatState : State
         {
             character.transform.rotation = Quaternion.Slerp(character.transform.rotation, Quaternion.LookRotation(velocity), character.rotationDampTime);
         }
- 
+        
+        // Force speed to 0 immediately if there's no input (for immediate SFX stop)
+        if (input.magnitude < 0.01f)
+        {
+            character.animator.SetFloat("speed", 0f);
+        }
     }
  
     public override void Exit()
     {
         base.Exit();
- 
+
         gravityVelocity.y = 0f;
         character.playerVelocity = new Vector3(input.x, 0, input.y);
- 
+        
+        // Reset speed parameter to 0 when exiting state
+        character.animator.SetFloat("speed", 0f);
+
         if (velocity.sqrMagnitude > 0)
         {
             character.transform.rotation = Quaternion.LookRotation(velocity);
         }
- 
+
     }
  
 }

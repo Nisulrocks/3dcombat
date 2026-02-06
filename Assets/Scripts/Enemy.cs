@@ -23,9 +23,11 @@ public class Enemy : MonoBehaviour
     [Header("Movement")]
     [SerializeField] float moveSpeed = 3.5f;
     [SerializeField] float rotationSpeed = 5f;
+    #pragma warning disable CS0414
     [SerializeField] float stoppingDistance = 0.5f;
     [SerializeField] float rotationThreshold = 15f;
     [SerializeField] float movementBuffer = 0.3f;
+    #pragma warning restore CS0414
     [SerializeField] float gravity = -9.81f;
 
     [Header("Obstacle Avoidance")]
@@ -35,13 +37,23 @@ public class Enemy : MonoBehaviour
     [SerializeField] float raySpreadAngle = 60f;
     [SerializeField] LayerMask obstacleLayer;
     [SerializeField] float sideRayDistance = 1.5f;
+    #pragma warning disable CS0414
     [SerializeField] float wallSlideSpeed = 2f;
+    #pragma warning restore CS0414
+
+    [Header("Audio")]
+    [SerializeField] private AudioClip attackSFX;
+    [SerializeField] private AudioClip damageSFX;
+    [SerializeField] private AudioClip deathSFX;
+    [SerializeField] private AudioClip alertSFX;
 
     GameObject player;
     Animator animator;
     CharacterController characterController;
+    AudioSource audioSource;
     float timePassed;
     bool isMoving = false;
+    bool hasAlerted = false; // Track if alert sound has been played
     Vector3 verticalVelocity;
     Vector3 avoidanceDirection = Vector3.zero;
 
@@ -49,6 +61,11 @@ public class Enemy : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
 
         maxHealth = health;
         OnHealthChanged?.Invoke(health, maxHealth);
@@ -91,6 +108,16 @@ public class Enemy : MonoBehaviour
 
         if (distanceToPlayer <= aggroRange)
         {
+            // Play alert sound on first detection
+            if (!hasAlerted)
+            {
+                hasAlerted = true;
+                if (alertSFX != null && audioSource != null)
+                {
+                    audioSource.PlayOneShot(alertSFX);
+                }
+            }
+
             // Calculate direction to player
             Vector3 directionToPlayer = (player.transform.position - transform.position).normalized;
             directionToPlayer.y = 0;
@@ -151,6 +178,7 @@ public class Enemy : MonoBehaviour
         else
         {
             isMoving = false;
+            hasAlerted = false; // Reset alert when player leaves range
             if (characterController != null)
             {
                 characterController.Move(verticalVelocity * Time.deltaTime);
@@ -166,6 +194,13 @@ public class Enemy : MonoBehaviour
             if (distanceToPlayer <= attackRange)
             {
                 animator.SetTrigger("attack");
+                
+                // Play attack sound
+                if (attackSFX != null && audioSource != null)
+                {
+                    audioSource.PlayOneShot(attackSFX);
+                }
+                
                 timePassed = 0;
             }
         }
@@ -246,6 +281,43 @@ public class Enemy : MonoBehaviour
 
     void Die()
     {
+        // Play death sound on temporary AudioSource that persists after destruction
+        if (deathSFX != null)
+        {
+            PlayDeathSoundPersistent(deathSFX);
+        }
+
+        // Destroy enemy immediately
+        DestroyEnemy();
+    }
+
+    private void PlayDeathSoundPersistent(AudioClip clip)
+    {
+        // Create a temporary GameObject to hold the AudioSource
+        GameObject tempAudioObject = new GameObject("TempDeathSound");
+        tempAudioObject.transform.position = transform.position;
+        
+        // Add AudioSource component
+        AudioSource tempAudioSource = tempAudioObject.AddComponent<AudioSource>();
+        
+        // Configure AudioSource
+        tempAudioSource.clip = clip;
+        tempAudioSource.volume = audioSource != null ? audioSource.volume : 1f;
+        tempAudioSource.pitch = audioSource != null ? audioSource.pitch : 1f;
+        tempAudioSource.spatialBlend = 1f; // Make it 3D sound
+        tempAudioSource.minDistance = 1f;
+        tempAudioSource.maxDistance = 50f;
+        tempAudioSource.rolloffMode = AudioRolloffMode.Linear;
+        
+        // Play the sound
+        tempAudioSource.Play();
+        
+        // Destroy the temporary object after the sound finishes
+        Destroy(tempAudioObject, clip.length + 0.1f); // Small buffer to ensure sound completes
+    }
+
+    private void DestroyEnemy()
+    {
         OnDied?.Invoke();
         Instantiate(ragdoll, transform.position, transform.rotation);
         Destroy(this.gameObject);
@@ -255,6 +327,12 @@ public class Enemy : MonoBehaviour
     {
         health -= damageAmount;
         animator.SetTrigger("damage");
+
+        // Play damage sound
+        if (damageSFX != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(damageSFX);
+        }
 
         OnHealthChanged?.Invoke(health, maxHealth);
 

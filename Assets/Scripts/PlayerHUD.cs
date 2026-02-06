@@ -61,7 +61,7 @@ public class PlayerHUD : MonoBehaviour
 
     private void CheckPlayerReferences()
     {
-        Character character = FindObjectOfType<Character>();
+        Character character = FindFirstObjectByType<Character>();
         if (character != currentCharacter)
         {
             currentCharacter = character;

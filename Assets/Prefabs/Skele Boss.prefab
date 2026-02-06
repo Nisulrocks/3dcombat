@@ -2277,6 +2277,7 @@ MonoBehaviour:
   activationRadius: 15
   returnToCenterRadius: 12
   centerPoint: {fileID: 0}
+  yLevelThreshold: 1
   attackRange: 3
   attackCooldown: 1.5
   damage: 25
@@ -2321,10 +2322,15 @@ MonoBehaviour:
   attack3VFX: {fileID: 0}
   healVFX: {fileID: 0}
   hitVFX: {fileID: 0}
-  rageSFX: {fileID: 0}
-  healSFX: {fileID: 0}
-  shieldSFX: {fileID: 0}
-  attackSFX: {fileID: 0}
+  rageSFX: {fileID: 8300000, guid: 99dae692b5972e341bf2869dbb06e61c, type: 3}
+  healSFX: {fileID: 8300000, guid: 8ef2ca7924a6293458f306b0c67a2aed, type: 3}
+  shieldSFX: {fileID: 8300000, guid: 53d2d387d867b894d9e3fecd5300e934, type: 3}
+  attackSFX:
+  - {fileID: 8300000, guid: 5ac18934b39c1de4b85ade4fb8fee82c, type: 3}
+  - {fileID: 8300000, guid: 352473a8b635a0144988bc04048acba8, type: 3}
+  - {fileID: 8300000, guid: 49a2b4df44ec2f949a8a51210f3ed7ad, type: 3}
+  alertSFX: {fileID: 8300000, guid: e617f6961ccf31a4b81506bbd7f8f6fb, type: 3}
+  deathSFX: {fileID: 8300000, guid: 76b5b535438fcfe4b8fd02a52bf2f022, type: 3}
 --- !u!1 &5669882339369120556
 GameObject:
   m_ObjectHideFlags: 0

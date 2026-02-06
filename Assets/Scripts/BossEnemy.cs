@@ -30,7 +30,9 @@ public class BossEnemy : MonoBehaviour
     [SerializeField] private float patrolSpeed = 2f;
     [SerializeField] private float chaseSpeed = 5f;
     [SerializeField] private float rotationSpeed = 5f;
+    #pragma warning disable CS0414
     [SerializeField] private float stoppingDistance = 2f;
+    #pragma warning restore CS0414
 
     [Header("Obstacle Avoidance")]
     [SerializeField] private LayerMask obstacleLayer;
@@ -46,11 +48,14 @@ public class BossEnemy : MonoBehaviour
     [SerializeField] private float activationRadius = 15f;
     [SerializeField] private float returnToCenterRadius = 12f;
     [SerializeField] private Transform centerPoint;
+    [SerializeField] private float yLevelThreshold = 5f; // Max Y difference for targeting
 
     [Header("Attack Settings")]
     [SerializeField] private float attackRange = 3f;
     [SerializeField] private float attackCooldown = 1.5f;
+    #pragma warning disable CS0414
     [SerializeField] private float damage = 25f;
+    #pragma warning restore CS0414
     [SerializeField] private float rageDamage = 75f;
 
     [Header("Combo Settings")]
@@ -74,7 +79,9 @@ public class BossEnemy : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float rageChance = 0.5f; // Chance to enter rage when threshold met
     [SerializeField] private float rageDuration = 10f;
     [SerializeField] private float rageCooldown = 30f;
+    #pragma warning disable CS0414
     [SerializeField] private float rageDamageMultiplier = 3f;
+    #pragma warning restore CS0414
     [SerializeField] private float pushbackForce = 15f;
     [SerializeField] private float pushbackRadius = 5f;
 
@@ -115,7 +122,9 @@ public class BossEnemy : MonoBehaviour
     [SerializeField] private AudioClip rageSFX;
     [SerializeField] private AudioClip healSFX;
     [SerializeField] private AudioClip shieldSFX;
-    [SerializeField] private AudioClip attackSFX;
+    [SerializeField] private AudioClip[] attackSFX; // Array for different combo levels
+    [SerializeField] private AudioClip alertSFX;
+    [SerializeField] private AudioClip deathSFX;
     #endregion
 
     #region Private Variables
@@ -126,6 +135,7 @@ public class BossEnemy : MonoBehaviour
     private GameObject currentShield;
     private GameObject currentRageVFX;
     private AudioSource audioSource;
+    private bool hasAlerted = false; // Track if alert sound has been played
     
     // Public properties for HUD access
     public BossState CurrentState => currentState;
@@ -192,7 +202,7 @@ public class BossEnemy : MonoBehaviour
         }
         
         // Find HUD reference
-        bossHUD = FindObjectOfType<BossHUD>();
+        bossHUD = FindFirstObjectByType<BossHUD>();
     }
 
     private void Start()
@@ -248,6 +258,14 @@ public class BossEnemy : MonoBehaviour
     #endregion
 
     #region State Machine
+    private bool IsPlayerOnSameLevel()
+    {
+        if (player == null) return false;
+        
+        float yDifference = Mathf.Abs(transform.position.y - player.transform.position.y);
+        return yDifference <= yLevelThreshold;
+    }
+
     private void UpdateState()
     {
         if (player == null)
@@ -369,25 +387,51 @@ public class BossEnemy : MonoBehaviour
     #region State Handlers
     private void HandleIdleState(float distanceToPlayer, float distanceToCenter)
     {
-        // Check if player is within activation radius
-        if (distanceToPlayer <= activationRadius && distanceToCenter <= patrolRadius)
+        // Check if player is within activation radius AND on same Y level
+        if (distanceToPlayer <= activationRadius && distanceToCenter <= patrolRadius && IsPlayerOnSameLevel())
         {
+            // Play alert sound on first detection
+            if (!hasAlerted)
+            {
+                hasAlerted = true;
+                if (alertSFX != null && audioSource != null)
+                {
+                    audioSource.PlayOneShot(alertSFX);
+                }
+            }
+            
             ChangeState(BossState.Chase);
             return;
         }
 
+        // Reset alert when player leaves range
+        hasAlerted = false;
+        
         // Patrol around center if idle for too long
         ChangeState(BossState.Patrol);
     }
 
     private void HandlePatrolState(float distanceToPlayer, float distanceToCenter)
     {
-        // Check if player is within activation radius
-        if (distanceToPlayer <= activationRadius && distanceToCenter <= patrolRadius)
+        // Check if player is within activation radius AND on same Y level
+        if (distanceToPlayer <= activationRadius && distanceToCenter <= patrolRadius && IsPlayerOnSameLevel())
         {
+            // Play alert sound on first detection
+            if (!hasAlerted)
+            {
+                hasAlerted = true;
+                if (alertSFX != null && audioSource != null)
+                {
+                    audioSource.PlayOneShot(alertSFX);
+                }
+            }
+            
             ChangeState(BossState.Chase);
             return;
         }
+
+        // Reset alert when player leaves range
+        hasAlerted = false;
 
         // Check if too far from center
         if (distanceToCenter > patrolRadius)
@@ -417,8 +461,8 @@ public class BossEnemy : MonoBehaviour
 
     private void HandleChaseState(float distanceToPlayer, float distanceToCenter)
     {
-        // Check if player left the boss area
-        if (distanceToCenter > returnToCenterRadius || distanceToPlayer > activationRadius * 1.5f)
+        // Check if player left the boss area OR is on different Y level
+        if (distanceToCenter > returnToCenterRadius || distanceToPlayer > activationRadius * 1.5f || !IsPlayerOnSameLevel())
         {
             ChangeState(BossState.ReturnToCenter);
             return;
@@ -531,6 +575,7 @@ public class BossEnemy : MonoBehaviour
         if (distanceToCenter < 1f)
         {
             // Back at center, go to patrol
+            hasAlerted = false; // Reset alert when returning to center
             SetRandomPatrolTarget();
             ChangeState(BossState.Patrol);
             return;
@@ -654,10 +699,11 @@ public class BossEnemy : MonoBehaviour
         string attackTrigger = $"attack{currentCombo}";
         animator.SetTrigger(attackTrigger);
         
-        // Play attack SFX
-        if (attackSFX != null)
+        // Play attack SFX based on combo level
+        AudioClip attackSFXToPlay = GetAttackSFX(currentCombo);
+        if (attackSFXToPlay != null)
         {
-            audioSource.PlayOneShot(attackSFX);
+            audioSource.PlayOneShot(attackSFXToPlay);
         }
 
         // Start attack coroutine
@@ -844,6 +890,19 @@ public class BossEnemy : MonoBehaviour
         HealthSystem playerHealth = player.GetComponent<HealthSystem>();
         if (playerHealth != null && !playerHealth.IsInvincible)
         {
+            // Check if player has an active shield
+            ShieldSystem shieldSystem = player.GetComponent<ShieldSystem>();
+            if (shieldSystem != null && shieldSystem.CurrentShield != null)
+            {
+                // Shield blocked the rage damage!
+                Debug.Log("Boss rage damage blocked by player shield!");
+                
+                // Show "BLOCKED" damage text
+                DamageText.CreateDamageText(player.transform.position, 0, 0); // 0 damage, no combo
+                
+                return; // Don't deal damage
+            }
+            
             float damage = rageDamage;
             playerHealth.TakeDamage(damage);
             DamageText.CreateRageDamageText(player.transform.position, damage);
@@ -1213,6 +1272,43 @@ public class BossEnemy : MonoBehaviour
             bossHUD.HideAfterDelay(0.5f);
         }
 
+        // Play death sound on temporary AudioSource that persists after destruction
+        if (deathSFX != null)
+        {
+            PlayDeathSoundPersistent(deathSFX);
+        }
+
+        // Destroy boss immediately
+        DestroyBoss();
+    }
+
+    private void PlayDeathSoundPersistent(AudioClip clip)
+    {
+        // Create a temporary GameObject to hold the AudioSource
+        GameObject tempAudioObject = new GameObject("TempDeathSound");
+        tempAudioObject.transform.position = transform.position;
+        
+        // Add AudioSource component
+        AudioSource tempAudioSource = tempAudioObject.AddComponent<AudioSource>();
+        
+        // Configure AudioSource
+        tempAudioSource.clip = clip;
+        tempAudioSource.volume = audioSource != null ? audioSource.volume : 1f;
+        tempAudioSource.pitch = audioSource != null ? audioSource.pitch : 1f;
+        tempAudioSource.spatialBlend = 1f; // Make it 3D sound
+        tempAudioSource.minDistance = 1f;
+        tempAudioSource.maxDistance = 50f;
+        tempAudioSource.rolloffMode = AudioRolloffMode.Linear;
+        
+        // Play the sound
+        tempAudioSource.Play();
+        
+        // Destroy the temporary object after the sound finishes
+        Destroy(tempAudioObject, clip.length + 0.1f); // Small buffer to ensure sound completes
+    }
+
+    private void DestroyBoss()
+    {
         // Spawn ragdoll like regular enemies
         if (ragdoll != null)
         {
@@ -1229,7 +1325,7 @@ public class BossEnemy : MonoBehaviour
         // Notify any listeners
         Debug.Log("Boss defeated!");
         
-        // Destroy boss immediately (no death animation)
+        // Destroy boss
         Destroy(gameObject);
     }
     #endregion
@@ -1271,6 +1367,19 @@ public class BossEnemy : MonoBehaviour
         {
             ChangeState(BossState.Chase);
         }
+    }
+
+    // Public method to get attack SFX based on combo level
+    public AudioClip GetAttackSFX(int comboLevel)
+    {
+        if (attackSFX == null || attackSFX.Length == 0)
+        {
+            return null;
+        }
+        
+        // Clamp combo level to valid range (1-based to 0-based index)
+        int index = Mathf.Clamp(comboLevel - 1, 0, attackSFX.Length - 1);
+        return attackSFX[index];
     }
 
     // Wrapper methods for Sword Damage Events (since sword can't be dragged to animation events)

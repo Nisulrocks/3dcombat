@@ -13,7 +13,9 @@ public class ClimbingState : State
     private Transform currentLadder;
     private Vector3 ladderSnapPosition;
     private bool hasEnteredState = false; // Prevent animation spam
+    #pragma warning disable CS0414
     private float dismountOffset = 1.5f; // How far to move player when dismounting at top
+    #pragma warning restore CS0414
     private float jumpOffForce = 2f; // How far to push player back when jumping off
     private bool jumpPressed = false;
     
@@ -219,16 +221,16 @@ public class ClimbingState : State
         Vector3 rayOrigin = character.transform.position + Vector3.up * 1f;
         Vector3 rayDirection = character.transform.forward;
         
-        Debug.Log($"Checking for ladder - Origin: {rayOrigin}, Direction: {rayDirection}, Distance: {character.ladderDetectionDistance}, Layer: {character.ladderLayer}");
+        // Debug.Log($"Checking for ladder - Origin: {rayOrigin}, Direction: {rayDirection}, Distance: {character.ladderDetectionDistance}, Layer: {character.ladderLayer}");
         
         if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit hit, character.ladderDetectionDistance, character.ladderLayer))
         {
-            Debug.Log($"Ladder found: {hit.transform.name} at {hit.point}");
+            // Debug.Log($"Ladder found: {hit.transform.name} at {hit.point}");
             return true;
         }
         else
         {
-            Debug.Log("No ladder detected");
+            // Debug.Log("No ladder detected");
             return false;
         }
     }

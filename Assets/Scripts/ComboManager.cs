@@ -41,7 +41,7 @@ public class ComboManager : MonoBehaviour
         if (comboUIPrefab != null)
         {
             // Find or create a SCREEN SPACE Canvas (not world space)
-            Canvas[] allCanvases = FindObjectsOfType<Canvas>();
+            Canvas[] allCanvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
             Canvas screenCanvas = null;
             
             // Look for a screen space overlay canvas first

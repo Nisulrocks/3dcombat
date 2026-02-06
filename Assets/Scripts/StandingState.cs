@@ -11,9 +11,9 @@ public class StandingState: State
     bool sprint;
     float playerSpeed;
     bool drawWeapon;
+    #pragma warning disable CS0414
     float timePassed; // Add timer for animation sequencing
-    float footstepTimer; // Timer for footstep sounds
-    float footstepInterval = 0.5f; // Time between footsteps
+    #pragma warning restore CS0414
 
     Vector3 cVelocity;
 
@@ -33,7 +33,6 @@ public class StandingState: State
         drawWeapon = false;
         input = Vector2.zero;
         timePassed = 0f; // Initialize timer
-        footstepTimer = 0f; // Initialize footstep timer
         
         currentVelocity = Vector3.zero;
         gravityVelocity.y = 0;
@@ -78,7 +77,16 @@ public class StandingState: State
     {
         base.LogicUpdate();
  
-        character.animator.SetFloat("speed", input.magnitude, character.speedDampTime, Time.deltaTime);
+        // Handle speed parameter properly - ensure it goes to 0 when not moving
+        float targetSpeed = input.magnitude;
+        
+        // If input is very small, treat as no input
+        if (targetSpeed < 0.1f)
+        {
+            targetSpeed = 0f;
+        }
+        
+        character.animator.SetFloat("speed", targetSpeed, character.speedDampTime, Time.deltaTime);
 
         // Check for ladder and transition to climbing
         if (ClimbingState.CanStartClimbing(character) && input.y > 0.1f)
@@ -134,26 +142,13 @@ public class StandingState: State
         if (velocity.sqrMagnitude>0)
         {
             character.transform.rotation = Quaternion.Slerp(character.transform.rotation, Quaternion.LookRotation(velocity),character.rotationDampTime);
-            
-            // Handle footstep sounds
-            footstepTimer += Time.deltaTime;
-            float currentFootstepInterval = sprint ? footstepInterval * 0.7f : footstepInterval; // Faster footsteps when sprinting
-            
-            if (footstepTimer >= currentFootstepInterval && grounded)
-            {
-                footstepTimer = 0f;
-                if (AudioManager.Instance != null)
-                {
-                    AudioManager.Instance.PlayFootstepSound();
-                }
-            }
-        }
-        else
-        {
-            // Reset timer when not moving
-            footstepTimer = 0f;
         }
         
+        // Force speed to 0 immediately if there's no input (for immediate SFX stop)
+        if (input.magnitude < 0.01f)
+        {
+            character.animator.SetFloat("speed", 0f);
+        }
     }
  
     public override void Exit()
@@ -162,7 +157,10 @@ public class StandingState: State
  
         gravityVelocity.y = 0f;
         character.playerVelocity = new Vector3(input.x, 0, input.y);
- 
+        
+        // Reset speed parameter to 0 when exiting state
+        character.animator.SetFloat("speed", 0f);
+
         if (velocity.sqrMagnitude > 0)
         {
             character.transform.rotation = Quaternion.LookRotation(velocity);

@@ -3,8 +3,8 @@ public class SprintJumpState:State
 {
     float timePassed;
     float jumpTime;
-    Vector3 velocity;
-    Vector3 input;
+    new Vector3 velocity;
+    new Vector3 input;
  
     public SprintJumpState(Character _character, StateMachine _stateMachine) : base(_character, _stateMachine)
     {

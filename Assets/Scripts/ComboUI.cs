@@ -21,7 +21,9 @@ public class ComboUI : MonoBehaviour
     [SerializeField] Vector2 verticalPositionRange = new Vector2(-200, 200);
     [SerializeField] Vector2 rotationRange = new Vector2(-15, 15);
     [SerializeField] float positionTransitionSpeed = 0.3f;
+    #pragma warning disable CS0414
     [SerializeField] float autoHideDelay = 0.3f;
+    #pragma warning restore CS0414
     
     [Header("Animation")]
     [SerializeField] AnimationCurve popupCurve;
