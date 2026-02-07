@@ -1995,7 +1995,7 @@ MonoBehaviour:
   radiusDamageRange: 5
   initialPushBackForce: 5
   radiusPushBackForce: 15
-  radiusDamageVFX: {fileID: 9080140021571130472, guid: 82066d902ed0dd6488ddfd32eb994801, type: 3}
+  radiusDamageVFX: {fileID: 3367848850429417705, guid: 8234a70f8ee28a94ea37347e39da20bd, type: 3}
   swordFirePrefab: {fileID: 8400424712307853490, guid: 366377810aaf4fc4ab2be725a54c5712, type: 3}
   timeSlowScale: 0.1
   superActivationDuration: 5

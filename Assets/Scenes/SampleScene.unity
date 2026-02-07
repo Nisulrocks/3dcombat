@@ -4779,7 +4779,7 @@ MonoBehaviour:
       Size: {x: 0.8, y: 0.8}
       Offset: {x: 0, y: 0}
   CenterOnActivate: 1
-  TargetOffset: {x: 0, y: 1, z: 0}
+  TargetOffset: {x: 0, y: -0.5, z: 0}
   Damping: {x: 0, y: 0}
   Lookahead:
     Enabled: 0
@@ -4810,7 +4810,7 @@ MonoBehaviour:
     LookAtTarget: {fileID: 0}
     CustomLookAtTarget: 0
   Lens:
-    FieldOfView: 60.000004
+    FieldOfView: 90
     OrthographicSize: 5
     NearClipPlane: 0.3
     FarClipPlane: 1000
@@ -4837,7 +4837,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 987586206}
   serializedVersion: 2
-  m_LocalRotation: {x: 7.160392e-10, y: -0.8506508, z: -1.9294188e-10, w: 0.52573115}
+  m_LocalRotation: {x: 0.1530705, y: -0.8137965, z: 0.24767321, w: 0.502954}
   m_LocalPosition: {x: 5.33165, y: 2, z: 1.78292}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -15428,6 +15428,10 @@ PrefabInstance:
       propertyPath: freeLookCamera
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 411416926471919951, guid: c4575ab278af89a459fd5bcfe0cc47c1, type: 3}
+      propertyPath: radiusDamageVFX
+      value: 
+      objectReference: {fileID: 3367848850429417705, guid: 8234a70f8ee28a94ea37347e39da20bd, type: 3}
     - target: {fileID: 1695747800857798987, guid: c4575ab278af89a459fd5bcfe0cc47c1, type: 3}
       propertyPath: health
       value: 100
