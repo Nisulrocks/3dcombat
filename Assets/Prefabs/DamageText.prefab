@@ -61,7 +61,15 @@ MonoBehaviour:
   - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   - {r: 1, g: 0.6470588, b: 0, a: 1}
   - {r: 1, g: 0, b: 0, a: 1}
+  blockedColor: {r: 0, g: 1, b: 1, a: 1}
+  invincibleColor: {r: 1, g: 0, b: 1, a: 1}
+  superColor: {r: 1, g: 0.5, b: 0, a: 1}
+  rageColor: {r: 0.8, g: 0, b: 0, a: 1}
+  rageDamageColor: {r: 1, g: 1, b: 0, a: 1}
+  healColor: {r: 0, g: 0.8, b: 0.2, a: 1}
+  summonColor: {r: 0, g: 0, b: 0, a: 1}
   popupScaleMultiplier: 1.2
+  ragePopupScaleMultiplier: 1.8
   popupCurve:
     serializedVersion: 2
     m_Curve:
@@ -111,7 +119,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  - {fileID: 2180264, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -156,8 +164,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 999
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -187,7 +195,7 @@ MonoBehaviour:
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 1
+  m_fontStyle: 17
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535

@@ -8,10 +8,13 @@ public class RespawnManager : MonoBehaviour
 
     [Header("Respawn Settings")]
     [SerializeField] private float respawnTime = 5f;
-    [SerializeField] private Transform respawnPoint;
+    [SerializeField] private RespawnPoint[] respawnPoints;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject respawnVFX;
     [SerializeField] private Vector3 respawnVFXOffset = Vector3.zero;
+
+    [Header("Debug")]
+    [SerializeField] private bool showRespawnPointGizmos = true;
 
     [Header("UI")]
     [SerializeField] private RespawnUI respawnUI;
@@ -22,6 +25,8 @@ public class RespawnManager : MonoBehaviour
 
     private bool isRespawning = false;
     private GameObject currentRagdoll = null;
+    private RespawnPoint currentRespawnPoint;
+    private RespawnPoint defaultRespawnPoint;
 
     private void Awake()
     {
@@ -37,6 +42,9 @@ public class RespawnManager : MonoBehaviour
 
     private void Start()
     {
+        // Initialize respawn points
+        InitializeRespawnPoints();
+
         // Hide respawn UI at start
         if (respawnUI != null)
         {
@@ -126,9 +134,9 @@ public class RespawnManager : MonoBehaviour
 
     private void RespawnPlayer()
     {
-        if (playerPrefab == null || respawnPoint == null)
+        if (playerPrefab == null || currentRespawnPoint == null)
         {
-            Debug.LogError("RespawnManager: Player prefab or respawn point not assigned!");
+            Debug.LogError("RespawnManager: Player prefab or current respawn point not assigned!");
             return;
         }
 
@@ -142,13 +150,13 @@ public class RespawnManager : MonoBehaviour
         // Spawn respawn VFX at respawn point with offset
         if (respawnVFX != null)
         {
-            Vector3 vfxPosition = respawnPoint.position + respawnVFXOffset;
+            Vector3 vfxPosition = currentRespawnPoint.Position + respawnVFXOffset;
             GameObject vfx = Instantiate(respawnVFX, vfxPosition, Quaternion.identity);
             Destroy(vfx, 3f); // Auto-destroy VFX after 3 seconds
         }
 
         // Instantiate new player at respawn point
-        GameObject newPlayer = Instantiate(playerPrefab, respawnPoint.position, respawnPoint.rotation);
+        GameObject newPlayer = Instantiate(playerPrefab, currentRespawnPoint.Position, currentRespawnPoint.Rotation);
 
         // Reset player health to max
         HealthSystem healthSystem = newPlayer.GetComponent<HealthSystem>();
@@ -183,8 +191,98 @@ public class RespawnManager : MonoBehaviour
         // Reset PlayerHUD
         UpdatePlayerHUD();
 
-        Debug.Log("Player respawned at: " + respawnPoint.position);
+        Debug.Log($"Player respawned at: {currentRespawnPoint.PointName} ({currentRespawnPoint.Position})");
     }
+
+    #region Respawn Point Management
+    private void InitializeRespawnPoints()
+    {
+        if (respawnPoints == null || respawnPoints.Length == 0)
+        {
+            Debug.LogError("RespawnManager: No respawn points assigned!");
+            return;
+        }
+
+        // Find the default respawn point
+        defaultRespawnPoint = null;
+        foreach (RespawnPoint point in respawnPoints)
+        {
+            if (point.IsDefault)
+            {
+                defaultRespawnPoint = point;
+                break;
+            }
+        }
+
+        // If no default found, use the first one
+        if (defaultRespawnPoint == null)
+        {
+            defaultRespawnPoint = respawnPoints[0];
+            Debug.LogWarning($"RespawnManager: No default respawn point found. Using '{defaultRespawnPoint.PointName}' as default.");
+        }
+
+        // Set current to default
+        currentRespawnPoint = defaultRespawnPoint;
+        Debug.Log($"RespawnManager initialized with {respawnPoints.Length} respawn points. Current: {currentRespawnPoint.PointName}");
+    }
+
+    /// <summary>
+    /// Sets the active respawn point by name
+    /// </summary>
+    /// <param name="pointName">Name of the respawn point to activate</param>
+    /// <returns>True if successful, false if point not found</returns>
+    public bool SetActiveRespawnPoint(string pointName)
+    {
+        if (string.IsNullOrEmpty(pointName))
+        {
+            Debug.LogWarning("RespawnManager: Cannot set respawn point with null or empty name");
+            return false;
+        }
+
+        foreach (RespawnPoint point in respawnPoints)
+        {
+            if (point.PointName == pointName)
+            {
+                RespawnPoint previousPoint = currentRespawnPoint;
+                currentRespawnPoint = point;
+                
+                Debug.Log($"Respawn point changed from '{previousPoint.PointName}' to '{point.PointName}'");
+                return true;
+            }
+        }
+
+        Debug.LogWarning($"RespawnManager: Respawn point '{pointName}' not found");
+        return false;
+    }
+
+    /// <summary>
+    /// Gets the current active respawn point
+    /// </summary>
+    public RespawnPoint GetCurrentRespawnPoint()
+    {
+        return currentRespawnPoint;
+    }
+
+    /// <summary>
+    /// Gets all available respawn points
+    /// </summary>
+    public RespawnPoint[] GetAllRespawnPoints()
+    {
+        return respawnPoints;
+    }
+
+    /// <summary>
+    /// Resets to the default respawn point
+    /// </summary>
+    public void ResetToDefaultRespawnPoint()
+    {
+        if (defaultRespawnPoint != null)
+        {
+            currentRespawnPoint = defaultRespawnPoint;
+            Debug.Log($"Respawn point reset to default: {defaultRespawnPoint.PointName}");
+        }
+    }
+    #endregion
 
     private void UpdateCinemachineCameras(Transform newTarget, Animator newAnimator)
     {
@@ -286,4 +384,35 @@ public class RespawnManager : MonoBehaviour
             Debug.Log("Reset PlayerHUD after respawn");
         }
     }
+
+    #region Gizmos
+    private void OnDrawGizmos()
+    {
+        if (!showRespawnPointGizmos || respawnPoints == null) return;
+
+        foreach (RespawnPoint point in respawnPoints)
+        {
+            if (point.Transform == null) continue;
+
+            // Draw respawn point
+            Gizmos.color = point.IsDefault ? Color.green : Color.blue;
+            if (point == currentRespawnPoint)
+            {
+                Gizmos.color = Color.red; // Current respawn point in red
+            }
+
+            // Draw sphere
+            Gizmos.DrawWireSphere(point.Position, 0.5f);
+
+            // Draw forward direction
+            Gizmos.DrawLine(point.Position, point.Position + point.Transform.forward * 1f);
+
+            // Draw label
+            #if UNITY_EDITOR
+            UnityEditor.Handles.Label(point.Position + Vector3.up * 0.7f, 
+                $"{point.PointName} {(point.IsDefault ? "(Default)" : "")} {(point == currentRespawnPoint ? "[CURRENT]" : "")}");
+            #endif
+        }
+    }
+    #endregion
 }

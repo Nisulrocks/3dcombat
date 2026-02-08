@@ -2233,27 +2233,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b58a53a65f38f9548984f08a024f28df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
-  health: 3
+  health: 50
   hitVFX: {fileID: 100002, guid: fc7f8379080d0a844ad699b91bfd56f0, type: 3}
   ragdoll: {fileID: 5841957933071386244, guid: 63a346cb0916b794baba15fb30dcf795, type: 3}
   attackCD: 3
-  attackRange: 2
+  attackRange: 1
   aggroRange: 4
+  yLevelThreshold: 1
   moveSpeed: 3.5
+  patrolSpeed: 1.5
   rotationSpeed: 5
-  stoppingDistance: -0.3
-  rotationThreshold: 15
-  movementBuffer: 0.3
   gravity: -9.81
+  patrolRadius: 5
+  minIdleTime: 2
+  maxIdleTime: 5
+  patrolPointReachedDist: 0.5
+  returnToStartDist: 1
   obstacleDetectionRange: 5
   avoidanceForce: 2
   numberOfRays: 5
   raySpreadAngle: 60
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 2696
   sideRayDistance: 1.5
-  wallSlideSpeed: 2
   attackSFX: {fileID: 8300000, guid: 5ac18934b39c1de4b85ade4fb8fee82c, type: 3}
   damageSFX: {fileID: 8300000, guid: 3368ff04d0da54346a6776e63a56cb2e, type: 3}
   deathSFX: {fileID: 8300000, guid: 29f15225ac7f21947909729699d680b3, type: 3}

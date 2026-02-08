@@ -2266,7 +2266,7 @@ MonoBehaviour:
   stoppingDistance: 2
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 640
+    m_Bits: 2688
   avoidanceDistance: 3
   avoidanceAngle: 45
   avoidanceStrength: 2
@@ -2321,6 +2321,7 @@ MonoBehaviour:
   attack2VFX: {fileID: 0}
   attack3VFX: {fileID: 0}
   healVFX: {fileID: 339158821923109191, guid: 108ca465382c11742bd2c91fe4fdb13f, type: 3}
+  healVFXOffset: {x: 0, y: 0, z: 0}
   hitVFX: {fileID: 100002, guid: ac1aa04288fad804ba1cd769f4377aaf, type: 3}
   rageSFX: {fileID: 8300000, guid: 99dae692b5972e341bf2869dbb06e61c, type: 3}
   healSFX: {fileID: 8300000, guid: 8ef2ca7924a6293458f306b0c67a2aed, type: 3}

@@ -588,22 +588,49 @@ public class BossEnemy : MonoBehaviour
     #endregion
 
     #region Movement
+    private Vector3 gravityVelocity;
+
     private void MoveTowards(Vector3 target, float speed)
     {
-        Vector3 direction = (target - transform.position).normalized;
+        Vector3 direction = (target - transform.position);
         direction.y = 0;
+
+        // Don't move if already very close
+        if (direction.magnitude < 0.1f) return;
+
+        direction.Normalize();
         
         // Detect obstacles and calculate avoidance
         Vector3 avoidance = ApplyObstacleAvoidance(direction);
         
-        // Combine desired direction with obstacle avoidance for movement only
-        Vector3 desiredDirection = direction + avoidance;
+        // Blend avoidance with desired direction - clamp avoidance so it can't overpower
+        Vector3 desiredDirection = direction + Vector3.ClampMagnitude(avoidance, avoidanceStrength);
         desiredDirection.y = 0;
-        desiredDirection.Normalize();
         
+        if (desiredDirection.magnitude > 0.01f)
+        {
+            desiredDirection.Normalize();
+        }
+        else
+        {
+            desiredDirection = direction; // Fallback to original direction if avoidance cancels out
+        }
+
+        // Apply gravity
+        if (characterController != null && characterController.isGrounded)
+        {
+            gravityVelocity.y = 0f;
+        }
+        else
+        {
+            gravityVelocity.y += -9.81f * Time.deltaTime;
+        }
+        
+        Vector3 movement = desiredDirection * speed * Time.deltaTime + gravityVelocity * Time.deltaTime;
+
         if (characterController != null)
         {
-            characterController.Move(desiredDirection * speed * Time.deltaTime);
+            characterController.Move(movement);
         }
         else
         {
@@ -611,13 +638,14 @@ public class BossEnemy : MonoBehaviour
         }
     }
     
-    // Apply obstacle avoidance to movement direction (following Enemy.cs pattern)
     private Vector3 ApplyObstacleAvoidance(Vector3 desiredDirection)
     {
         Vector3 avoidanceVector = Vector3.zero;
         Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
 
-        // Multi-ray obstacle detection in a cone pattern
+        if (avoidanceRays < 2) avoidanceRays = 2;
+
+        // Multi-ray obstacle detection in a cone pattern based on movement direction
         for (int i = 0; i < avoidanceRays; i++)
         {
             float angle = -avoidanceAngle / 2 + (avoidanceAngle / (avoidanceRays - 1)) * i;
@@ -626,24 +654,28 @@ public class BossEnemy : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(rayOrigin, rayDirection, out hit, avoidanceDistance, obstacleLayer))
             {
-                // Calculate avoidance force based on distance
                 float distanceFactor = 1 - (hit.distance / avoidanceDistance);
                 
-                // Calculate perpendicular avoidance direction (slide along walls)
-                Vector3 avoidDirection = Vector3.Cross(hit.normal, Vector3.up).normalized;
+                // Use hit normal to slide along walls
+                Vector3 slideDirection = Vector3.ProjectOnPlane(desiredDirection, hit.normal).normalized;
                 
-                // Choose direction that moves away from obstacle
-                if (Vector3.Dot(avoidDirection, transform.right) < 0)
+                // If slide direction is too small, push perpendicular to the wall
+                if (slideDirection.magnitude < 0.1f)
                 {
-                    avoidDirection = -avoidDirection;
+                    slideDirection = Vector3.Cross(hit.normal, Vector3.up).normalized;
+                    // Pick the side closer to our desired direction
+                    if (Vector3.Dot(slideDirection, desiredDirection) < 0)
+                    {
+                        slideDirection = -slideDirection;
+                    }
                 }
 
-                avoidanceVector += avoidDirection * distanceFactor * avoidanceStrength;
+                avoidanceVector += slideDirection * distanceFactor * avoidanceStrength;
 
                 if (showDebugRays)
                 {
                     Debug.DrawRay(rayOrigin, rayDirection * hit.distance, Color.red);
-                    Debug.DrawRay(hit.point, avoidDirection * 2f, Color.yellow);
+                    Debug.DrawRay(hit.point, slideDirection * 2f, Color.yellow);
                 }
             }
             else
@@ -652,6 +684,31 @@ public class BossEnemy : MonoBehaviour
                 {
                     Debug.DrawRay(rayOrigin, rayDirection * avoidanceDistance, Color.green);
                 }
+            }
+        }
+
+        // Side ray detection to prevent getting stuck on walls approached from the side
+        RaycastHit leftHit;
+        Vector3 leftDir = Quaternion.Euler(0, -90, 0) * desiredDirection;
+        if (Physics.Raycast(rayOrigin, leftDir, out leftHit, avoidanceDistance * 0.6f, obstacleLayer))
+        {
+            float distanceFactor = 1 - (leftHit.distance / (avoidanceDistance * 0.6f));
+            avoidanceVector += -leftDir * distanceFactor * avoidanceStrength * 0.5f;
+            if (showDebugRays)
+            {
+                Debug.DrawRay(rayOrigin, leftDir * leftHit.distance, Color.magenta);
+            }
+        }
+
+        RaycastHit rightHit;
+        Vector3 rightDir = Quaternion.Euler(0, 90, 0) * desiredDirection;
+        if (Physics.Raycast(rayOrigin, rightDir, out rightHit, avoidanceDistance * 0.6f, obstacleLayer))
+        {
+            float distanceFactor = 1 - (rightHit.distance / (avoidanceDistance * 0.6f));
+            avoidanceVector += -rightDir * distanceFactor * avoidanceStrength * 0.5f;
+            if (showDebugRays)
+            {
+                Debug.DrawRay(rayOrigin, rightDir * rightHit.distance, Color.magenta);
             }
         }
 

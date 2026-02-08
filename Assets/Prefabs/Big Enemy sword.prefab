@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 2730613282192929275}
   - component: {fileID: 62537932262240313}
   m_Layer: 0
-  m_Name: PT_Sword_01_a
+  m_Name: Big Enemy sword
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -232,4 +232,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   weaponLength: 0.8
-  weaponDamage: 10
+  weaponDamage: 20
+  shieldLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
