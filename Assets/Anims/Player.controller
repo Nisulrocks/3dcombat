@@ -1223,12 +1223,12 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: sheathWeapon
-    m_EventTreshold: 0
   - m_ConditionMode: 4
     m_ConditionEvent: speed
     m_EventTreshold: 0.01
+  - m_ConditionMode: 1
+    m_ConditionEvent: sheathWeapon
+    m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 3771261315741893169}
   m_Solo: 0
@@ -1590,12 +1590,12 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: sheathWeapon
-    m_EventTreshold: 0
   - m_ConditionMode: 4
     m_ConditionEvent: speed
     m_EventTreshold: 0.01
+  - m_ConditionMode: 1
+    m_ConditionEvent: sheathWeapon
+    m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 8044299155931381922}
   m_Solo: 0

@@ -4,17 +4,10 @@ using UnityEngine;
 
 public class HealthSystem : MonoBehaviour
 {
-    [SerializeField] float health = 100;
-    [SerializeField] float maxHealth = 100;
-    [SerializeField] GameObject hitVFX;
-    [SerializeField] GameObject ragdoll;
+    [SerializeField] private PlayerHealthData healthData;
 
-    [Header("Auto Healing")]
-    [SerializeField] private bool enableAutoHeal = true;
-    [SerializeField] private float healDelay = 10f; // Time without damage before healing starts
-    [SerializeField] private float healRate = 5f; // Health per second
-    [SerializeField] private float healInterval = 0.5f; // How often to heal (in seconds)
-    [SerializeField] private GameObject healVFX; // Visual effect for healing
+    private float health;
+    private float maxHealth;
 
     private bool isInvincible = false;
     private float lastDamageTime;
@@ -27,8 +20,15 @@ public class HealthSystem : MonoBehaviour
     Animator animator;
     void Start()
     {
+        if (healthData == null)
+        {
+            Debug.LogError("HealthSystem: PlayerHealthData not assigned!");
+            return;
+        }
+
         animator = GetComponent<Animator>();
-        maxHealth = health; // Set max health to initial health value
+        maxHealth = healthData.maxHealth;
+        health = maxHealth;
         lastDamageTime = Time.time; // Initialize damage time
     }
 
@@ -92,7 +92,7 @@ public class HealthSystem : MonoBehaviour
             PlayerHUD.Instance.ForceHealthUpdate(0, maxHealth);
         }
 
-        GameObject spawnedRagdoll = Instantiate(ragdoll, transform.position, transform.rotation);
+        GameObject spawnedRagdoll = Instantiate(healthData.ragdoll, transform.position, transform.rotation);
 
         // Notify RespawnManager before destroying, pass the ragdoll reference
         if (RespawnManager.Instance != null)
@@ -114,10 +114,10 @@ public class HealthSystem : MonoBehaviour
 
     private void Update()
     {
-        if (enableAutoHeal && !isHealing && health < maxHealth)
+        if (healthData != null && healthData.enableAutoHeal && !isHealing && health < maxHealth)
         {
             // Check if enough time has passed since last damage
-            if (Time.time - lastDamageTime >= healDelay)
+            if (Time.time - lastDamageTime >= healthData.healDelay)
             {
                 StartHealing();
             }
@@ -133,9 +133,10 @@ public class HealthSystem : MonoBehaviour
         Debug.Log("Player auto-healing started");
 
         // Spawn heal VFX if available
-        if (healVFX != null)
+        if (healthData.healVFX != null)
         {
-            Instantiate(healVFX, transform.position, Quaternion.identity);
+            Vector3 vfxPosition = transform.position + healthData.healVFXOffset;
+            Instantiate(healthData.healVFX, vfxPosition, Quaternion.identity);
         }
     }
 
@@ -155,14 +156,14 @@ public class HealthSystem : MonoBehaviour
         while (health < maxHealth)
         {
             // Check if player took damage during healing
-            if (Time.time - lastDamageTime < healDelay)
+            if (Time.time - lastDamageTime < healthData.healDelay)
             {
                 StopHealing();
                 yield break;
             }
 
             // Heal the player
-            float healAmount = healRate * healInterval;
+            float healAmount = healthData.healRate * healthData.healInterval;
             health = Mathf.Min(health + healAmount, maxHealth);
 
             // Update HUD
@@ -175,7 +176,7 @@ public class HealthSystem : MonoBehaviour
             DamageText.CreateHealText(transform.position + Vector3.up);
             Debug.Log($"Heal text shown for {healAmount:F1} HP at {transform.position + Vector3.up}");
 
-            yield return new WaitForSeconds(healInterval);
+            yield return new WaitForSeconds(healthData.healInterval);
         }
 
         // Healing complete
@@ -185,11 +186,11 @@ public class HealthSystem : MonoBehaviour
 
     public void HitVFX(Vector3 hitPosition)
     {
-        if (hitVFX == null) return;
+        if (healthData == null || healthData.hitVFX == null) return;
 
         // Instantiate VFX at hit position
-        GameObject hit = Instantiate(hitVFX, hitPosition, Quaternion.identity);
-        
+        GameObject hit = Instantiate(healthData.hitVFX, hitPosition, Quaternion.identity);
+
         // Add FollowTargetVFX component to make it follow this transform
         FollowTargetVFX followComponent = hit.GetComponent<FollowTargetVFX>();
         if (followComponent == null)

@@ -2234,7 +2234,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   health: 3
-  hitVFX: {fileID: 1000012909287652, guid: abb9f519b142e304d9c45b56afa768bc, type: 3}
+  hitVFX: {fileID: 100002, guid: fc7f8379080d0a844ad699b91bfd56f0, type: 3}
   ragdoll: {fileID: 5841957933071386244, guid: 63a346cb0916b794baba15fb30dcf795, type: 3}
   attackCD: 3
   attackRange: 2

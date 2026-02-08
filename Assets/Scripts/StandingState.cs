@@ -41,6 +41,9 @@ public class StandingState: State
         playerSpeed = character.playerSpeed;
         grounded = character.controller.isGrounded;
         gravityValue = character.gravityValue;    
+        
+        // Set speed parameter to current movement speed
+        character.animator.SetFloat("speed", velocity.magnitude);    
     }
  
     public override void HandleInput()

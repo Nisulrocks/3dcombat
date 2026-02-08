@@ -1951,15 +1951,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28e7e0e84ee7664489d79c991815a8fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HealthSystem
-  health: 100
-  maxHealth: 100
-  hitVFX: {fileID: 1000012909287652, guid: abb9f519b142e304d9c45b56afa768bc, type: 3}
-  ragdoll: {fileID: 7975616879779000031, guid: ec076037e28b71d4dab0262cf844b223, type: 3}
-  enableAutoHeal: 1
-  healDelay: 10
-  healRate: 5
-  healInterval: 0.5
-  healVFX: {fileID: 0}
+  healthData: {fileID: 11400000, guid: 4ae70095f71a2ab4caae7b339e8ed5c4, type: 2}
 --- !u!114 &2113068883960378229
 MonoBehaviour:
   m_ObjectHideFlags: 0

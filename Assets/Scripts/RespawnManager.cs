@@ -11,6 +11,7 @@ public class RespawnManager : MonoBehaviour
     [SerializeField] private Transform respawnPoint;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject respawnVFX;
+    [SerializeField] private Vector3 respawnVFXOffset = Vector3.zero;
 
     [Header("UI")]
     [SerializeField] private RespawnUI respawnUI;
@@ -138,10 +139,11 @@ public class RespawnManager : MonoBehaviour
             currentRagdoll = null;
         }
 
-        // Spawn respawn VFX at respawn point
+        // Spawn respawn VFX at respawn point with offset
         if (respawnVFX != null)
         {
-            GameObject vfx = Instantiate(respawnVFX, respawnPoint.position, Quaternion.identity);
+            Vector3 vfxPosition = respawnPoint.position + respawnVFXOffset;
+            GameObject vfx = Instantiate(respawnVFX, vfxPosition, Quaternion.identity);
             Destroy(vfx, 3f); // Auto-destroy VFX after 3 seconds
         }
 

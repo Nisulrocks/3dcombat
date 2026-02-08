@@ -116,6 +116,7 @@ public class BossEnemy : MonoBehaviour
     [SerializeField] private GameObject attack2VFX;
     [SerializeField] private GameObject attack3VFX;
     [SerializeField] private GameObject healVFX;
+    [SerializeField] private Vector3 healVFXOffset = Vector3.zero;
     [SerializeField] private GameObject hitVFX;
 
     [Header("Audio")]
@@ -963,7 +964,8 @@ public class BossEnemy : MonoBehaviour
         // Spawn heal VFX
         if (healVFX != null)
         {
-            GameObject healEffect = Instantiate(healVFX, transform.position, Quaternion.identity);
+            Vector3 vfxPosition = transform.position + healVFXOffset;
+            GameObject healEffect = Instantiate(healVFX, vfxPosition, Quaternion.identity);
             healEffect.transform.SetParent(transform);
             Destroy(healEffect, healDuration);
         }
