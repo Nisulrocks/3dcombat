@@ -39,7 +39,7 @@ public class State
  
     public virtual void Enter()
     {
-        //StateUI.instance.SetStateText(this.ToString());
+        
         Debug.Log("Enter State: "+this.ToString());
     }
  

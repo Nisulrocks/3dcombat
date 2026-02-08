@@ -53,16 +53,16 @@ public class SprintJumpState:State
     {
         base.PhysicsUpdate();
         
-        // Apply gravity
+        
         gravityVelocity.y += character.gravityValue * Time.deltaTime;
         
-        // Apply air control movement (reduced for better control)
+        
         Vector3 airMovement = velocity * (character.airControl * 0.5f) * character.sprintSpeed * Time.deltaTime;
         Vector3 totalMovement = airMovement + gravityVelocity * Time.deltaTime;
         
         character.controller.Move(totalMovement);
         
-        // Rotate towards movement direction
+        
         if (velocity.magnitude > 0.1f)
         {
             character.transform.rotation = Quaternion.Slerp(character.transform.rotation, Quaternion.LookRotation(velocity), character.rotationDampTime);

@@ -9,7 +9,7 @@ public class EnemyDamageDealer : MonoBehaviour
 
     [SerializeField] float weaponLength;
     [SerializeField] float weaponDamage;
-    [SerializeField] LayerMask shieldLayerMask; // Layer for shield colliders
+    [SerializeField] LayerMask shieldLayerMask; 
 
     void Start()
     {
@@ -17,36 +17,36 @@ public class EnemyDamageDealer : MonoBehaviour
         hasDealtDamage = false;
     }
 
-    // Update is called once per frame
+    
     void Update()
     {
         if (canDealDamage && !hasDealtDamage)
         {
             RaycastHit hit;
 
-            int playerLayerMask = 1 << 8; // Player layer
+            int playerLayerMask = 1 << 8; 
             if (Physics.Raycast(transform.position, -transform.up, out hit, weaponLength, playerLayerMask))
             {
                 Debug.Log("Hit something: " + hit.transform.name);
                 
-                // Check if player has an active shield
+                
                 ShieldSystem shieldSystem = hit.transform.GetComponent<ShieldSystem>();
                 if (shieldSystem != null && shieldSystem.CurrentShield != null)
                 {
-                    // Shield blocked the attack!
+                    
                     Debug.Log("Attack blocked by shield!");
                     hasDealtDamage = true;
                     
-                    // Show "BLOCKED" damage text
-                    DamageText.CreateDamageText(hit.point, 0, 0); // 0 damage, no combo
                     
-                    // Optional: Play block effect/sound here
-                    // Could add shield impact VFX or sound
+                    DamageText.CreateDamageText(hit.point, 0, 0); 
                     
-                    return; // Don't apply damage
+                    
+                    
+                    
+                    return; 
                 }
                 
-                // No shield active, apply damage normally
+                
                 if (hit.transform.TryGetComponent(out HealthSystem health))
                 {
                     health.TakeDamage(weaponDamage);
@@ -54,16 +54,16 @@ public class EnemyDamageDealer : MonoBehaviour
                     hasDealtDamage = true;
                     Debug.Log("hit");
 
-                    // Spawn damage text at hit position (enemy damage doesn't use combo)
+                    
                     DamageText.CreateDamageText(hit.point, weaponDamage, 0);
 
-                    // Trigger time stop effect
+                    
                     if (TimeStopManager.Instance != null)
                     {
                         TimeStopManager.Instance.StopTime();
                     }
 
-                    // Trigger chromatic aberration effect on successful hit
+                    
                     if (HitChromaticEffect.Instance != null)
                     {
                         HitChromaticEffect.Instance.TriggerHitChromatic();

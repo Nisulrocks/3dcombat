@@ -19,7 +19,7 @@ public class ComboManager : MonoBehaviour
     private Coroutine comboResetCoroutine;
     private bool comboWindowActive = false;
 
-    // Events for UI
+    
     public System.Action<int, float> OnComboChanged;
     public System.Action<float> OnComboWindowChanged;
 
@@ -37,14 +37,14 @@ public class ComboManager : MonoBehaviour
 
     private void Start()
     {
-        // Spawn the combo UI prefab
+        
         if (comboUIPrefab != null)
         {
-            // Find or create a SCREEN SPACE Canvas (not world space)
+            
             Canvas[] allCanvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
             Canvas screenCanvas = null;
             
-            // Look for a screen space overlay canvas first
+            
             foreach (Canvas canvas in allCanvases)
             {
                 if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
@@ -54,7 +54,7 @@ public class ComboManager : MonoBehaviour
                 }
             }
             
-            // If no screen space overlay found, look for screen space camera
+            
             if (screenCanvas == null)
             {
                 foreach (Canvas canvas in allCanvases)
@@ -67,7 +67,7 @@ public class ComboManager : MonoBehaviour
                 }
             }
             
-            // Create a new screen space canvas if none exists
+            
             if (screenCanvas == null)
             {
                 GameObject canvasObj = new GameObject("ComboUI Canvas");
@@ -77,7 +77,7 @@ public class ComboManager : MonoBehaviour
                 canvasObj.AddComponent<GraphicRaycaster>();
             }
             
-            // Spawn the UI as a child of the SCREEN SPACE canvas
+            
             GameObject spawnedUI = Instantiate(comboUIPrefab, screenCanvas.transform);
             spawnedUI.SetActive(true);
         }
@@ -98,24 +98,24 @@ public class ComboManager : MonoBehaviour
         currentCombo++;
         lastHitTime = Time.time;
 
-        // Cancel existing reset coroutine
+        
         if (comboResetCoroutine != null)
         {
             StopCoroutine(comboResetCoroutine);
         }
 
-        // Trigger UI event
+        
         OnComboChanged?.Invoke(currentCombo, GetDamageMultiplier());
 
         Debug.Log($"Combo: {currentCombo} | Damage Multiplier: {GetDamageMultiplier()}x");
     }
 
-    // Call this when attack animation starts
+    
     public void StartComboWindow(float animationDuration)
     {
         comboWindowActive = true;
         
-        // Cancel existing reset coroutine
+        
         if (comboResetCoroutine != null)
         {
             StopCoroutine(comboResetCoroutine);
@@ -123,16 +123,16 @@ public class ComboManager : MonoBehaviour
 
         Debug.Log($"ComboManager: Starting combo window - Duration: {animationDuration:F2}s, Current Combo: {currentCombo}");
 
-        // Start new reset coroutine based on animation duration
+        
         comboResetCoroutine = StartCoroutine(ComboWindowCoroutine(animationDuration));
     }
 
-    // Call this when attack animation ends
+    
     public void EndComboWindow()
     {
         comboWindowActive = false;
         
-        // Stop the coroutine if it's running
+        
         if (comboResetCoroutine != null)
         {
             StopCoroutine(comboResetCoroutine);
@@ -141,7 +141,7 @@ public class ComboManager : MonoBehaviour
         
         Debug.Log("ComboManager: Ending combo window - Hiding slider");
         
-        // Hide the slider
+        
         OnComboWindowChanged?.Invoke(0f);
     }
 
@@ -149,8 +149,8 @@ public class ComboManager : MonoBehaviour
     {
         float elapsed = 0f;
         
-        // Update slider progress during combo window
-        // Use unscaledDeltaTime so time slow doesn't affect the combo window
+        
+        
         while (elapsed < animationDuration && comboWindowActive)
         {
             elapsed += Time.unscaledDeltaTime;
@@ -159,23 +159,23 @@ public class ComboManager : MonoBehaviour
             yield return null;
         }
         
-        // Always reset combo window flag when coroutine ends
+        
         comboWindowActive = false;
         comboResetCoroutine = null;
         
-        // If no next hit was registered, reset combo
+        
         if (currentCombo > 0)
         {
             ResetCombo();
         }
         else
         {
-            // Just hide the slider if combo is already 0
+            
             OnComboWindowChanged?.Invoke(0f);
         }
     }
 
-    // Legacy method for external reset (like taking damage)
+    
     public void ResetCombo()
     {
         currentCombo = 0;
@@ -186,7 +186,7 @@ public class ComboManager : MonoBehaviour
             comboResetCoroutine = null;
         }
         
-        // Trigger UI event
+        
         OnComboChanged?.Invoke(0, 1f);
         OnComboWindowChanged?.Invoke(0f);
         
@@ -198,7 +198,7 @@ public class ComboManager : MonoBehaviour
         return currentCombo;
     }
 
-    // For UI display
+    
     public float GetComboProgress()
     {
         if (comboResetCoroutine == null) return 0f;

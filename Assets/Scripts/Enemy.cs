@@ -31,7 +31,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] float attackCD = 3f;
     [SerializeField] float attackRange = 1f;
     [SerializeField] float aggroRange = 4f;
-    [SerializeField] float yLevelThreshold = 5f; // Max Y difference for targeting
+    [SerializeField] float yLevelThreshold = 5f; 
 
     [Header("Movement")]
     [SerializeField] float moveSpeed = 3.5f;
@@ -40,11 +40,11 @@ public class Enemy : MonoBehaviour
     [SerializeField] float gravity = -9.81f;
 
     [Header("Patrol & Idle")]
-    [SerializeField] float patrolRadius = 5f; // How far from spawn point to patrol
-    [SerializeField] float minIdleTime = 2f; // Min time to idle before patrolling
-    [SerializeField] float maxIdleTime = 5f; // Max time to idle before patrolling
-    [SerializeField] float patrolPointReachedDist = 0.5f; // How close to patrol point before picking new one
-    [SerializeField] float returnToStartDist = 1f; // How close to spawn before switching to Idle
+    [SerializeField] float patrolRadius = 5f; 
+    [SerializeField] float minIdleTime = 2f; 
+    [SerializeField] float maxIdleTime = 5f; 
+    [SerializeField] float patrolPointReachedDist = 0.5f; 
+    [SerializeField] float returnToStartDist = 1f; 
 
     [Header("Obstacle Avoidance")]
     [SerializeField] float obstacleDetectionRange = 2f;
@@ -62,13 +62,13 @@ public class Enemy : MonoBehaviour
     #endregion
 
     #region Private State
-    // References
+    
     GameObject player;
     Animator animator;
     CharacterController characterController;
     AudioSource audioSource;
 
-    // FSM
+    
     private EnemyState currentState = EnemyState.Idle;
     private Vector3 spawnPosition;
     private Vector3 currentPatrolTarget;
@@ -76,8 +76,8 @@ public class Enemy : MonoBehaviour
     private float attackCooldownTimer;
     private bool hasAlerted = false;
     private Vector3 verticalVelocity;
-    private bool isAttacking = false; // Track if attack animation is playing
-    private float attackAnimationDuration = 1.5f; // Approximate attack animation duration
+    private bool isAttacking = false; 
+    private float attackAnimationDuration = 1.5f; 
     private float attackStartTime;
     #endregion
 
@@ -105,10 +105,10 @@ public class Enemy : MonoBehaviour
 
         player = GameObject.FindGameObjectWithTag("Player");
 
-        // Cache spawn position for patrol/return behavior
+        
         spawnPosition = transform.position;
 
-        // Start in Idle with a random wait
+        
         ChangeState(EnemyState.Idle);
     }
 
@@ -119,7 +119,7 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        // Apply gravity
+        
         if (characterController != null && characterController.isGrounded)
         {
             verticalVelocity.y = 0;
@@ -129,13 +129,13 @@ public class Enemy : MonoBehaviour
             verticalVelocity.y += gravity * Time.deltaTime;
         }
 
-        // Tick attack cooldown
+        
         if (attackCooldownTimer > 0)
         {
             attackCooldownTimer -= Time.deltaTime;
         }
 
-        // Run current state
+        
         switch (currentState)
         {
             case EnemyState.Idle:
@@ -162,12 +162,12 @@ public class Enemy : MonoBehaviour
     {
         if (currentState == newState) return;
 
-        // Exit old state
+        
         OnStateExit(currentState);
 
         currentState = newState;
 
-        // Enter new state
+        
         OnStateEnter(newState);
     }
 
@@ -185,7 +185,7 @@ public class Enemy : MonoBehaviour
                 break;
 
             case EnemyState.Chase:
-                // Play alert sound on first detection
+                
                 if (!hasAlerted)
                 {
                     hasAlerted = true;
@@ -209,7 +209,7 @@ public class Enemy : MonoBehaviour
 
     private void OnStateExit(EnemyState state)
     {
-        // Nothing special needed on exit for now
+        
     }
     #endregion
 
@@ -219,14 +219,14 @@ public class Enemy : MonoBehaviour
         animator.SetFloat("speed", 0f);
         ApplyGravityOnly();
 
-        // Check for player aggro
+        
         if (CanSeePlayer())
         {
             ChangeState(EnemyState.Chase);
             return;
         }
 
-        // Count down idle timer, then patrol
+        
         stateTimer -= Time.deltaTime;
         if (stateTimer <= 0f)
         {
@@ -236,31 +236,31 @@ public class Enemy : MonoBehaviour
 
     private void UpdatePatrol()
     {
-        // Check for player aggro (higher priority)
+        
         if (CanSeePlayer())
         {
             ChangeState(EnemyState.Chase);
             return;
         }
 
-        // Move towards patrol target
+        
         Vector3 direction = (currentPatrolTarget - transform.position);
         direction.y = 0;
         float distToTarget = direction.magnitude;
 
         if (distToTarget < patrolPointReachedDist)
         {
-            // Reached patrol point, go back to idle
+            
             ChangeState(EnemyState.Idle);
             return;
         }
 
         direction.Normalize();
 
-        // Obstacle avoidance based on movement direction, not transform.forward
+        
         Vector3 avoidance = DetectObstacles(direction);
 
-        // Blend avoidance with desired direction - clamp so it can't overpower
+        
         Vector3 moveDir = direction + Vector3.ClampMagnitude(avoidance, avoidanceForce);
         moveDir.y = 0;
 
@@ -270,24 +270,24 @@ public class Enemy : MonoBehaviour
         }
         else
         {
-            moveDir = direction; // Fallback if avoidance cancels out
+            moveDir = direction; 
         }
 
-        // Rotate towards movement direction
+        
         if (moveDir != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(moveDir);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
 
-        // Move
+        
         Vector3 movement = moveDir * patrolSpeed * Time.deltaTime + verticalVelocity * Time.deltaTime;
         if (characterController != null)
         {
             characterController.Move(movement);
         }
 
-        animator.SetFloat("speed", 0.5f); // Half speed for patrol walk
+        animator.SetFloat("speed", 0.5f); 
     }
 
     private void UpdateChase()
@@ -301,21 +301,21 @@ public class Enemy : MonoBehaviour
         float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
         float distanceToSpawn = Vector3.Distance(transform.position, spawnPosition);
 
-        // If player left aggro range or is on different Y level, return to start
+        
         if (distanceToPlayer > aggroRange * 1.5f || !IsPlayerOnSameLevel())
         {
             ChangeState(EnemyState.ReturnToStart);
             return;
         }
 
-        // If close enough to attack and cooldown is ready
+        
         if (distanceToPlayer <= attackRange && attackCooldownTimer <= 0)
         {
             ChangeState(EnemyState.Attack);
             return;
         }
 
-        // Chase the player
+        
         Vector3 directionToPlayer = (player.transform.position - transform.position);
         directionToPlayer.y = 0;
         if (directionToPlayer.magnitude > 0.01f)
@@ -323,10 +323,10 @@ public class Enemy : MonoBehaviour
             directionToPlayer.Normalize();
         }
 
-        // Obstacle avoidance based on movement direction
+        
         Vector3 avoidance = DetectObstacles(directionToPlayer);
 
-        // Scale avoidance strength for chase speed so obstacles are properly avoided
+        
         float chaseAvoidanceStrength = avoidanceForce * (moveSpeed / patrolSpeed);
         Vector3 moveDir = directionToPlayer + Vector3.ClampMagnitude(avoidance, chaseAvoidanceStrength);
         moveDir.y = 0;
@@ -337,17 +337,17 @@ public class Enemy : MonoBehaviour
         }
         else
         {
-            moveDir = directionToPlayer; // Fallback if avoidance cancels out
+            moveDir = directionToPlayer; 
         }
 
-        // Always face the movement direction (not player) so it navigates around obstacles
+        
         if (moveDir != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(moveDir);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
 
-        // Only move if outside attack range
+        
         Vector3 horizontalMovement = Vector3.zero;
         if (distanceToPlayer > attackRange - 0.1f)
         {
@@ -374,7 +374,7 @@ public class Enemy : MonoBehaviour
         float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
         float timeSinceAttackStart = Time.time - attackStartTime;
 
-        // Face the player during attack
+        
         Vector3 directionToPlayer = (player.transform.position - transform.position).normalized;
         directionToPlayer.y = 0;
         if (directionToPlayer != Vector3.zero)
@@ -386,14 +386,14 @@ public class Enemy : MonoBehaviour
         ApplyGravityOnly();
         animator.SetFloat("speed", 0f);
 
-        // Perform attack if not already attacking and cooldown is ready
+        
         if (!isAttacking && attackCooldownTimer <= 0)
         {
             animator.SetTrigger("attack");
             isAttacking = true;
             attackStartTime = Time.time;
 
-            // Play attack sound
+            
             if (attackSFX != null && audioSource != null)
             {
                 audioSource.PlayOneShot(attackSFX);
@@ -402,20 +402,20 @@ public class Enemy : MonoBehaviour
             attackCooldownTimer = attackCD;
         }
 
-        // Only consider state transitions after attack animation has had time to play
+        
         if (timeSinceAttackStart >= attackAnimationDuration)
         {
-            // Reset attack flag so next attack can fire after cooldown
+            
             isAttacking = false;
 
-            // If player moved significantly out of attack range, chase again
+            
             if (distanceToPlayer > attackRange + 0.5f)
             {
                 ChangeState(EnemyState.Chase);
                 return;
             }
 
-            // If player left aggro range entirely
+            
             if (distanceToPlayer > aggroRange * 1.5f || !IsPlayerOnSameLevel())
             {
                 ChangeState(EnemyState.ReturnToStart);
@@ -426,7 +426,7 @@ public class Enemy : MonoBehaviour
 
     private void UpdateReturnToStart()
     {
-        // Check for player aggro while returning
+        
         if (CanSeePlayer())
         {
             ChangeState(EnemyState.Chase);
@@ -439,17 +439,17 @@ public class Enemy : MonoBehaviour
 
         if (distToSpawn < returnToStartDist)
         {
-            // Back at spawn, go idle
+            
             ChangeState(EnemyState.Idle);
             return;
         }
 
         direction.Normalize();
 
-        // Obstacle avoidance based on movement direction
+        
         Vector3 avoidance = DetectObstacles(direction);
 
-        // Blend avoidance with desired direction - clamp so it can't overpower
+        
         Vector3 moveDir = direction + Vector3.ClampMagnitude(avoidance, avoidanceForce);
         moveDir.y = 0;
 
@@ -459,17 +459,17 @@ public class Enemy : MonoBehaviour
         }
         else
         {
-            moveDir = direction; // Fallback if avoidance cancels out
+            moveDir = direction; 
         }
 
-        // Rotate towards movement direction
+        
         if (moveDir != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(moveDir);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
 
-        // Move back at patrol speed
+        
         Vector3 movement = moveDir * patrolSpeed * Time.deltaTime + verticalVelocity * Time.deltaTime;
         if (characterController != null)
         {
@@ -498,14 +498,14 @@ public class Enemy : MonoBehaviour
 
     private void SetRandomPatrolTarget()
     {
-        // Try to pick a patrol point that isn't blocked by obstacles
+        
         Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
         for (int attempt = 0; attempt < 5; attempt++)
         {
             Vector2 randomCircle = Random.insideUnitCircle * patrolRadius;
             Vector3 candidate = spawnPosition + new Vector3(randomCircle.x, 0, randomCircle.y);
 
-            // Check if path to candidate is clear
+            
             Vector3 dirToCandidate = (candidate - transform.position);
             dirToCandidate.y = 0;
             float dist = dirToCandidate.magnitude;
@@ -517,7 +517,7 @@ public class Enemy : MonoBehaviour
             }
         }
 
-        // Fallback: pick any random point (better than not patrolling)
+        
         Vector2 fallbackCircle = Random.insideUnitCircle * patrolRadius;
         currentPatrolTarget = spawnPosition + new Vector3(fallbackCircle.x, 0, fallbackCircle.y);
     }
@@ -539,7 +539,7 @@ public class Enemy : MonoBehaviour
 
         if (numberOfRays < 2) numberOfRays = 2;
 
-        // Multi-ray obstacle detection in a cone pattern based on MOVEMENT direction
+        
         for (int i = 0; i < numberOfRays; i++)
         {
             float angle = -raySpreadAngle / 2 + (raySpreadAngle / (numberOfRays - 1)) * i;
@@ -550,14 +550,14 @@ public class Enemy : MonoBehaviour
             {
                 float distanceFactor = 1 - (hit.distance / obstacleDetectionRange);
 
-                // Use hit normal to slide along walls instead of perpendicular cross
+                
                 Vector3 slideDirection = Vector3.ProjectOnPlane(desiredDirection, hit.normal).normalized;
 
-                // If slide direction is too small, push perpendicular to the wall
+                
                 if (slideDirection.magnitude < 0.1f)
                 {
                     slideDirection = Vector3.Cross(hit.normal, Vector3.up).normalized;
-                    // Pick the side closer to our desired direction
+                    
                     if (Vector3.Dot(slideDirection, desiredDirection) < 0)
                     {
                         slideDirection = -slideDirection;
@@ -575,7 +575,7 @@ public class Enemy : MonoBehaviour
             }
         }
 
-        // Side ray detection to prevent getting stuck on walls approached from the side
+        
         RaycastHit leftHit;
         Vector3 leftDir = Quaternion.Euler(0, -90, 0) * desiredDirection;
         if (Physics.Raycast(rayOrigin, leftDir, out leftHit, sideRayDistance, obstacleLayer))
@@ -611,39 +611,39 @@ public class Enemy : MonoBehaviour
     #region Health & Death
     void Die()
     {
-        // Play death sound on temporary AudioSource that persists after destruction
+        
         if (deathSFX != null)
         {
             PlayDeathSoundPersistent(deathSFX);
         }
 
-        // Destroy enemy immediately
+        
         DestroyEnemy();
     }
 
     private void PlayDeathSoundPersistent(AudioClip clip)
     {
-        // Create a temporary GameObject to hold the AudioSource
+        
         GameObject tempAudioObject = new GameObject("TempDeathSound");
         tempAudioObject.transform.position = transform.position;
         
-        // Add AudioSource component
+        
         AudioSource tempAudioSource = tempAudioObject.AddComponent<AudioSource>();
         
-        // Configure AudioSource
+        
         tempAudioSource.clip = clip;
         tempAudioSource.volume = audioSource != null ? audioSource.volume : 1f;
         tempAudioSource.pitch = audioSource != null ? audioSource.pitch : 1f;
-        tempAudioSource.spatialBlend = 1f; // Make it 3D sound
+        tempAudioSource.spatialBlend = 1f; 
         tempAudioSource.minDistance = 1f;
         tempAudioSource.maxDistance = 50f;
         tempAudioSource.rolloffMode = AudioRolloffMode.Linear;
         
-        // Play the sound
+        
         tempAudioSource.Play();
         
-        // Destroy the temporary object after the sound finishes
-        Destroy(tempAudioObject, clip.length + 0.1f); // Small buffer to ensure sound completes
+        
+        Destroy(tempAudioObject, clip.length + 0.1f); 
     }
 
     private void DestroyEnemy()
@@ -658,7 +658,7 @@ public class Enemy : MonoBehaviour
         health -= damageAmount;
         animator.SetTrigger("damage");
 
-        // Play damage sound
+        
         if (damageSFX != null && audioSource != null)
         {
             audioSource.PlayOneShot(damageSFX);
@@ -666,7 +666,7 @@ public class Enemy : MonoBehaviour
 
         OnHealthChanged?.Invoke(health, maxHealth);
 
-        // Getting hit forces chase state if player exists
+        
         if (player != null && health > 0)
         {
             ChangeState(EnemyState.Chase);
@@ -708,17 +708,17 @@ public class Enemy : MonoBehaviour
     {
         if (hitVFX == null) return;
 
-        // Instantiate VFX at hit position
+        
         GameObject hit = Instantiate(hitVFX, hitPosition, Quaternion.identity);
         
-        // Add FollowTargetVFX component to make it follow this transform
+        
         FollowTargetVFX followComponent = hit.GetComponent<FollowTargetVFX>();
         if (followComponent == null)
         {
             followComponent = hit.AddComponent<FollowTargetVFX>();
         }
         
-        // Set target to this transform with offset from hit position
+        
         Vector3 offset = hitPosition - transform.position;
         followComponent.SetTarget(transform, offset);
     }
@@ -732,16 +732,16 @@ public class Enemy : MonoBehaviour
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, aggroRange);
         
-        // Draw obstacle detection range
+        
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, obstacleDetectionRange);
 
-        // Draw patrol radius (from spawn point in play mode, from current pos in editor)
+        
         Gizmos.color = Color.blue;
         Vector3 center = Application.isPlaying ? spawnPosition : transform.position;
         Gizmos.DrawWireSphere(center, patrolRadius);
 
-        // Draw current patrol target in play mode
+        
         if (Application.isPlaying && currentState == EnemyState.Patrol)
         {
             Gizmos.color = Color.green;
@@ -752,7 +752,7 @@ public class Enemy : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        // Draw Y level threshold
+        
         Gizmos.color = new Color(1f, 0.5f, 0f, 0.2f);
         Vector3 pos = Application.isPlaying ? spawnPosition : transform.position;
         Gizmos.DrawCube(pos, new Vector3(aggroRange * 2, yLevelThreshold * 2, aggroRange * 2));

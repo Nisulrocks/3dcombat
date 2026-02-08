@@ -52,7 +52,7 @@ public class ComboUI : MonoBehaviour
             
         originalScale = transform.localScale;
         
-        // Start visible but hidden (alpha = 0)
+        
         canvasGroup.alpha = 0f;
         if (comboSlider != null)
             comboSlider.value = 0f;
@@ -60,14 +60,14 @@ public class ComboUI : MonoBehaviour
     
     private void Start()
     {
-        // Subscribe to combo events if ComboManager exists
+        
         if (ComboManager.Instance != null)
         {
             ComboManager.Instance.OnComboChanged += UpdateComboDisplay;
             ComboManager.Instance.OnComboWindowChanged += UpdateComboSlider;
         }
 
-        // Subscribe to super events if SuperSystem exists
+        
         if (SuperSystem.Instance != null)
         {
             SuperSystem.Instance.OnSuperActivated += ShowSuperActive;
@@ -77,7 +77,7 @@ public class ComboUI : MonoBehaviour
 
     private void Update()
     {
-        // Track visibility and auto-fade after max duration
+        
         if (canvasGroup.alpha > 0.01f)
         {
             if (!isVisible)
@@ -88,7 +88,7 @@ public class ComboUI : MonoBehaviour
             
             visibleTimer += Time.unscaledDeltaTime;
             
-            // Auto-fade if visible for too long and not in active combo
+            
             if (visibleTimer >= maxVisibleDuration)
             {
                 bool inActiveCombo = ComboManager.Instance != null && 
@@ -97,7 +97,7 @@ public class ComboUI : MonoBehaviour
                 
                 bool superActive = SuperSystem.Instance != null && SuperSystem.Instance.IsSuperActive;
                 
-                // Only auto-fade if not in active combo and super is not active
+                
                 if (!inActiveCombo && !superActive)
                 {
                     if (fadeOutCoroutine != null)
@@ -131,7 +131,7 @@ public class ComboUI : MonoBehaviour
 
     private void ShowSuperActive()
     {
-        // Cancel any existing coroutines
+        
         if (hideCoroutine != null)
             StopCoroutine(hideCoroutine);
         if (positionCoroutine != null)
@@ -139,16 +139,16 @@ public class ComboUI : MonoBehaviour
         if (currentPopupCoroutine != null)
             StopCoroutine(currentPopupCoroutine);
 
-        // Show SUPER! text
+        
         comboText.text = "SUPER!";
         multiplierText.text = "ACTIVE";
         
-        // Set super color (orange/red)
+        
         Color superColor = new Color(1f, 0.5f, 0f);
         comboText.color = superColor;
         multiplierText.color = superColor;
 
-        // Generate random position
+        
         GenerateRandomPositionAndRotation();
         positionCoroutine = StartCoroutine(MoveToPosition());
         currentPopupCoroutine = StartCoroutine(PopupAnimation());
@@ -165,14 +165,14 @@ public class ComboUI : MonoBehaviour
     {
         if (comboCount == 0)
         {
-            // Combo reset - fade out immediately
+            
             if (fadeOutCoroutine != null)
                 StopCoroutine(fadeOutCoroutine);
             fadeOutCoroutine = StartCoroutine(FadeOut());
             return;
         }
         
-        // Cancel any existing coroutines (including fade out)
+        
         if (hideCoroutine != null)
             StopCoroutine(hideCoroutine);
         if (positionCoroutine != null)
@@ -182,24 +182,24 @@ public class ComboUI : MonoBehaviour
         if (fadeOutCoroutine != null)
             StopCoroutine(fadeOutCoroutine);
         
-        // Reset visible timer when combo is refreshed
+        
         visibleTimer = 0f;
         
-        // Generate new random position and rotation for each combo
+        
         GenerateRandomPositionAndRotation();
         
-        // Update text
+        
         comboText.text = $"COMBO {comboCount}";
         multiplierText.text = $"{multiplier:F1}x";
         
-        // Update colors based on combo level
+        
         int colorIndex = Mathf.Min(comboCount - 1, comboColors.Length - 1);
         Color comboColor = comboColors[Mathf.Max(0, colorIndex)];
         
         comboText.color = comboColor;
         multiplierText.color = comboColor;
         
-        // Update slider colors
+        
         if (comboSlider != null)
         {
             Image sliderFill = comboSlider.fillRect.GetComponent<Image>();
@@ -207,21 +207,21 @@ public class ComboUI : MonoBehaviour
                 sliderFill.color = comboColor;
         }
         
-        // Start position transition
+        
         positionCoroutine = StartCoroutine(MoveToPosition());
         
-        // Trigger popup animation (this will also reset alpha to 1)
+        
         currentPopupCoroutine = StartCoroutine(PopupAnimation());
     }
     
     private void GenerateRandomPositionAndRotation()
     {
-        // Random position on right side of screen
+        
         float randomX = Random.Range(rightSidePositionRange.x, rightSidePositionRange.y);
         float randomY = Random.Range(verticalPositionRange.x, verticalPositionRange.y);
         targetPosition = new Vector3(randomX, randomY, 0);
         
-        // Random rotation
+        
         float randomRotation = Random.Range(rotationRange.x, rotationRange.y);
         targetRotation = Quaternion.Euler(0, 0, randomRotation);
     }
@@ -230,8 +230,8 @@ public class ComboUI : MonoBehaviour
     {
         if (progress == 0f)
         {
-            // Only start fade out if we're not in an active combo
-            // Check if combo count is 0 (combo reset) or if we're just ending the window
+            
+            
             if (ComboManager.Instance != null && ComboManager.Instance.GetCurrentCombo() == 0)
             {
                 if (fadeOutCoroutine != null)
@@ -241,7 +241,7 @@ public class ComboUI : MonoBehaviour
             return;
         }
         
-        // Show slider if we have a combo
+        
         if (comboSlider != null && comboSlider.gameObject.activeSelf)
         {
             if (currentSliderCoroutine != null)
@@ -261,14 +261,14 @@ public class ComboUI : MonoBehaviour
             elapsed += Time.deltaTime;
             float t = elapsed / positionTransitionSpeed;
             
-            // Smooth transition to new position and rotation
+            
             transform.localPosition = Vector3.Lerp(startPosition, targetPosition, t);
             transform.localRotation = Quaternion.Lerp(startRotation, targetRotation, t);
             
             yield return null;
         }
         
-        // Ensure we reach the exact target
+        
         transform.localPosition = targetPosition;
         transform.localRotation = targetRotation;
     }
@@ -279,7 +279,7 @@ public class ComboUI : MonoBehaviour
         Vector3 startScale = originalScale;
         Vector3 targetScale = originalScale * popupScaleMultiplier;
         
-        // Popup
+        
         while (elapsed < popupDuration * 0.3f)
         {
             elapsed += Time.deltaTime;
@@ -292,10 +292,10 @@ public class ComboUI : MonoBehaviour
             yield return null;
         }
         
-        // Shake effect
+        
         yield return StartCoroutine(ShakeEffect());
         
-        // Settle back
+        
         elapsed = 0f;
         while (elapsed < popupDuration * 0.4f)
         {
@@ -353,7 +353,7 @@ public class ComboUI : MonoBehaviour
         float elapsed = 0f;
         float startAlpha = canvasGroup.alpha;
         
-        // Use unscaledDeltaTime so time slow doesn't affect fade
+        
         while (elapsed < 1f / fadeSpeed)
         {
             elapsed += Time.unscaledDeltaTime;

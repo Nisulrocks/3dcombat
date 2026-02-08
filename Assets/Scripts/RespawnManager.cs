@@ -42,10 +42,10 @@ public class RespawnManager : MonoBehaviour
 
     private void Start()
     {
-        // Initialize respawn points
+        
         InitializeRespawnPoints();
 
-        // Hide respawn UI at start
+        
         if (respawnUI != null)
         {
             respawnUI.Hide();
@@ -64,7 +64,7 @@ public class RespawnManager : MonoBehaviour
     {
         isRespawning = true;
 
-        // Show and fade in the respawn panel
+        
         if (respawnUI != null)
         {
             respawnUI.Show();
@@ -72,7 +72,7 @@ public class RespawnManager : MonoBehaviour
             yield return StartCoroutine(FadeInPanel());
         }
 
-        // Countdown timer
+        
         float timeRemaining = respawnTime;
         while (timeRemaining > 0)
         {
@@ -84,10 +84,10 @@ public class RespawnManager : MonoBehaviour
             timeRemaining -= 0.1f;
         }
 
-        // Respawn the player
+        
         RespawnPlayer();
 
-        // Fade out and hide panel
+        
         yield return StartCoroutine(FadeOutPanel());
         
         if (respawnUI != null)
@@ -140,55 +140,55 @@ public class RespawnManager : MonoBehaviour
             return;
         }
 
-        // Destroy the ragdoll before spawning new player
+        
         if (currentRagdoll != null)
         {
             Destroy(currentRagdoll);
             currentRagdoll = null;
         }
 
-        // Spawn respawn VFX at respawn point with offset
+        
         if (respawnVFX != null)
         {
             Vector3 vfxPosition = currentRespawnPoint.Position + respawnVFXOffset;
             GameObject vfx = Instantiate(respawnVFX, vfxPosition, Quaternion.identity);
-            Destroy(vfx, 3f); // Auto-destroy VFX after 3 seconds
+            Destroy(vfx, 3f); 
         }
 
-        // Instantiate new player at respawn point
+        
         GameObject newPlayer = Instantiate(playerPrefab, currentRespawnPoint.Position, currentRespawnPoint.Rotation);
 
-        // Reset player health to max
+        
         HealthSystem healthSystem = newPlayer.GetComponent<HealthSystem>();
         if (healthSystem != null)
         {
             healthSystem.ResetHealth();
         }
 
-        // Reset character state
+        
         Character character = newPlayer.GetComponent<Character>();
         if (character != null)
         {
-            // Reset to standing state
+            
             if (character.movementSM != null && character.standing != null)
             {
                 character.movementSM.ChangeState(character.standing);
             }
         }
 
-        // Update all Cinemachine cameras to track the new player
+        
         UpdateCinemachineCameras(newPlayer.transform, newPlayer.GetComponent<Animator>());
 
-        // Update all enemies to target the new player
+        
         UpdateEnemyTargets(newPlayer);
 
-        // Update CameraSoftLock with new player reference
+        
         UpdateCameraSoftLock(newPlayer);
 
-        // Update SuperSystem with new player reference
+        
         UpdateSuperSystem(newPlayer);
 
-        // Reset PlayerHUD
+        
         UpdatePlayerHUD();
 
         Debug.Log($"Player respawned at: {currentRespawnPoint.PointName} ({currentRespawnPoint.Position})");
@@ -203,7 +203,7 @@ public class RespawnManager : MonoBehaviour
             return;
         }
 
-        // Find the default respawn point
+        
         defaultRespawnPoint = null;
         foreach (RespawnPoint point in respawnPoints)
         {
@@ -214,23 +214,23 @@ public class RespawnManager : MonoBehaviour
             }
         }
 
-        // If no default found, use the first one
+        
         if (defaultRespawnPoint == null)
         {
             defaultRespawnPoint = respawnPoints[0];
             Debug.LogWarning($"RespawnManager: No default respawn point found. Using '{defaultRespawnPoint.PointName}' as default.");
         }
 
-        // Set current to default
+        
         currentRespawnPoint = defaultRespawnPoint;
         Debug.Log($"RespawnManager initialized with {respawnPoints.Length} respawn points. Current: {currentRespawnPoint.PointName}");
     }
 
-    /// <summary>
-    /// Sets the active respawn point by name
-    /// </summary>
-    /// <param name="pointName">Name of the respawn point to activate</param>
-    /// <returns>True if successful, false if point not found</returns>
+    
+    
+    
+    
+    
     public bool SetActiveRespawnPoint(string pointName)
     {
         if (string.IsNullOrEmpty(pointName))
@@ -255,25 +255,25 @@ public class RespawnManager : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// Gets the current active respawn point
-    /// </summary>
+    
+    
+    
     public RespawnPoint GetCurrentRespawnPoint()
     {
         return currentRespawnPoint;
     }
 
-    /// <summary>
-    /// Gets all available respawn points
-    /// </summary>
+    
+    
+    
     public RespawnPoint[] GetAllRespawnPoints()
     {
         return respawnPoints;
     }
 
-    /// <summary>
-    /// Resets to the default respawn point
-    /// </summary>
+    
+    
+    
     public void ResetToDefaultRespawnPoint()
     {
         if (defaultRespawnPoint != null)
@@ -286,15 +286,15 @@ public class RespawnManager : MonoBehaviour
 
     private void UpdateCinemachineCameras(Transform newTarget, Animator newAnimator)
     {
-        // Find all CinemachineCamera components in the scene (Cinemachine 3.x)
+        
         CinemachineCamera[] cinemachineCameras = FindObjectsByType<CinemachineCamera>(FindObjectsSortMode.None);
         
         foreach (CinemachineCamera cam in cinemachineCameras)
         {
-            // Update tracking target
+            
             cam.Target.TrackingTarget = newTarget;
             
-            // If there's a LookAt target, update that too
+            
             if (cam.Target.LookAtTarget != null)
             {
                 cam.Target.LookAtTarget = newTarget;
@@ -303,7 +303,7 @@ public class RespawnManager : MonoBehaviour
             Debug.Log($"Updated Cinemachine camera '{cam.name}' to track new player");
         }
 
-        // Update State Driven Cameras with new animator
+        
         CinemachineStateDrivenCamera[] stateDrivenCameras = FindObjectsByType<CinemachineStateDrivenCamera>(FindObjectsSortMode.None);
         
         foreach (CinemachineStateDrivenCamera sdCam in stateDrivenCameras)
@@ -318,7 +318,7 @@ public class RespawnManager : MonoBehaviour
 
     private void UpdateEnemyTargets(GameObject newPlayer)
     {
-        // Find all enemies and update their player reference
+        
         Enemy[] enemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
         
         foreach (Enemy enemy in enemies)
@@ -334,7 +334,7 @@ public class RespawnManager : MonoBehaviour
         CameraSoftLock softLock = newPlayer.GetComponent<CameraSoftLock>();
         if (softLock != null)
         {
-            // Find camera by name
+            
             CinemachineCamera freeLookCam = FindCameraByName(freeLookCameraName);
             if (freeLookCam != null)
             {
@@ -353,7 +353,7 @@ public class RespawnManager : MonoBehaviour
         SuperSystem superSystem = newPlayer.GetComponent<SuperSystem>();
         if (superSystem != null)
         {
-            // Find camera by name
+            
             CinemachineCamera freeLookCam = FindCameraByName(freeLookCameraName);
             if (freeLookCam != null)
             {
@@ -394,20 +394,20 @@ public class RespawnManager : MonoBehaviour
         {
             if (point.Transform == null) continue;
 
-            // Draw respawn point
+            
             Gizmos.color = point.IsDefault ? Color.green : Color.blue;
             if (point == currentRespawnPoint)
             {
-                Gizmos.color = Color.red; // Current respawn point in red
+                Gizmos.color = Color.red; 
             }
 
-            // Draw sphere
+            
             Gizmos.DrawWireSphere(point.Position, 0.5f);
 
-            // Draw forward direction
+            
             Gizmos.DrawLine(point.Position, point.Position + point.Transform.forward * 1f);
 
-            // Draw label
+            
             #if UNITY_EDITOR
             UnityEditor.Handles.Label(point.Position + Vector3.up * 0.7f, 
                 $"{point.PointName} {(point.IsDefault ? "(Default)" : "")} {(point == currentRespawnPoint ? "[CURRENT]" : "")}");

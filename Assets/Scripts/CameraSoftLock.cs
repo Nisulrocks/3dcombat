@@ -28,7 +28,7 @@ public class CameraSoftLock : MonoBehaviour
 
     private void Awake()
     {
-        // Always set this as the instance (new player replaces old)
+        
         Instance = this;
     }
 
@@ -39,13 +39,13 @@ public class CameraSoftLock : MonoBehaviour
 
     private void InitializeReferences()
     {
-        // Find free look camera if not assigned
+        
         if (freeLookCamera == null)
         {
             freeLookCamera = FindFirstObjectByType<CinemachineCamera>();
         }
         
-        // Cache player reference (this component is on the player)
+        
         cachedPlayer = GetComponent<Character>();
         if (cachedPlayer == null)
         {
@@ -66,7 +66,7 @@ public class CameraSoftLock : MonoBehaviour
 
     private void Update()
     {
-        // Check if we're in combat mode
+        
         inCombatMode = IsInCombatMode();
 
         if (inCombatMode)
@@ -82,7 +82,7 @@ public class CameraSoftLock : MonoBehaviour
             currentBossTarget = null;
         }
 
-        // Draw debug lines in Update (Debug.DrawLine works here)
+        
         if (showDebug)
         {
             DrawDebugLines();
@@ -91,7 +91,7 @@ public class CameraSoftLock : MonoBehaviour
 
     private bool IsInCombatMode()
     {
-        // Check if player is in combat state
+        
         if (cachedPlayer == null)
         {
             cachedPlayer = FindFirstObjectByType<Character>();
@@ -108,7 +108,7 @@ public class CameraSoftLock : MonoBehaviour
     {
         nearbyEnemies.Clear();
         
-        // Find all enemies within range
+        
         Collider[] colliders = Physics.OverlapSphere(transform.position, lockRange, enemyLayer);
         
         foreach (Collider collider in colliders)
@@ -116,7 +116,7 @@ public class CameraSoftLock : MonoBehaviour
             Enemy enemy = collider.GetComponent<Enemy>();
             if (enemy != null && enemy.transform != null)
             {
-                // Check if enemy is in front of player
+                
                 Vector3 toEnemy = (enemy.transform.position - transform.position).normalized;
                 float angle = Vector3.Angle(transform.forward, toEnemy);
                 
@@ -132,7 +132,7 @@ public class CameraSoftLock : MonoBehaviour
     {
         nearbyBosses.Clear();
         
-        // Find all bosses within range
+        
         Collider[] colliders = Physics.OverlapSphere(transform.position, lockRange, enemyLayer);
         
         foreach (Collider collider in colliders)
@@ -140,7 +140,7 @@ public class CameraSoftLock : MonoBehaviour
             BossEnemy boss = collider.GetComponent<BossEnemy>();
             if (boss != null && boss.transform != null)
             {
-                // Check if boss is in front of player
+                
                 Vector3 toBoss = (boss.transform.position - transform.position).normalized;
                 float angle = Vector3.Angle(transform.forward, toBoss);
                 
@@ -157,10 +157,10 @@ public class CameraSoftLock : MonoBehaviour
         currentTarget = null;
         currentBossTarget = null;
 
-        // Prioritize bosses over regular enemies
+        
         if (nearbyBosses.Count > 0)
         {
-            // Find the closest boss to the center of the screen
+            
             float closestAngle = float.MaxValue;
             
             foreach (BossEnemy boss in nearbyBosses)
@@ -180,7 +180,7 @@ public class CameraSoftLock : MonoBehaviour
         }
         else if (nearbyEnemies.Count > 0)
         {
-            // Find the closest enemy to the center of the screen
+            
             float closestAngle = float.MaxValue;
             
             foreach (Enemy enemy in nearbyEnemies)
@@ -202,14 +202,14 @@ public class CameraSoftLock : MonoBehaviour
 
     private void ApplySoftLock()
     {
-        // Check for boss target first (prioritized)
+        
         if (currentBossTarget != null)
         {
             ApplySoftLockToTarget(currentBossTarget.transform);
             return;
         }
         
-        // Fall back to regular enemy
+        
         if (currentTarget == null) return;
         if (freeLookCamera == null) return;
 
@@ -219,31 +219,31 @@ public class CameraSoftLock : MonoBehaviour
         }
         if (cachedPlayer == null) return;
 
-        // Get the OrbitalFollow component from the Cinemachine camera
+        
         var orbitalFollow = freeLookCamera.GetComponent<CinemachineOrbitalFollow>();
         if (orbitalFollow == null) return;
 
-        // Calculate desired look direction from player to target
-        // Use enemy's center/head position instead of their feet
-        Vector3 targetPosition = currentTarget.transform.position + Vector3.up * 3.5f; // Adjust height offset as needed
+        
+        
+        Vector3 targetPosition = currentTarget.transform.position + Vector3.up * 3.5f; 
         Vector3 targetDirection = (targetPosition - cachedPlayer.transform.position).normalized;
         
-        // Calculate desired horizontal angle (around Y axis)
+        
         float desiredHorizontalAngle = Mathf.Atan2(targetDirection.x, targetDirection.z) * Mathf.Rad2Deg;
         
-        // Calculate desired vertical angle (up/down) - FIXED: Remove the negative sign
+        
         float horizontalDistance = new Vector3(targetDirection.x, 0, targetDirection.z).magnitude;
         float desiredVerticalAngle = Mathf.Atan2(targetDirection.y, horizontalDistance) * Mathf.Rad2Deg;
 
-        // Get current orbital angles
+        
         float currentHorizontal = orbitalFollow.HorizontalAxis.Value;
         float currentVertical = orbitalFollow.VerticalAxis.Value;
 
-        // Calculate differences
+        
         float horizontalDiff = Mathf.DeltaAngle(currentHorizontal, desiredHorizontalAngle);
         float verticalDiff = Mathf.DeltaAngle(currentVertical, desiredVerticalAngle);
 
-        // Apply smooth influence
+        
         if (Mathf.Abs(horizontalDiff) > 0.5f)
         {
             float horizontalInfluence = Mathf.Sign(horizontalDiff) * Mathf.Min(
@@ -274,31 +274,31 @@ public class CameraSoftLock : MonoBehaviour
         }
         if (cachedPlayer == null) return;
 
-        // Get the OrbitalFollow component from the Cinemachine camera
+        
         var orbitalFollow = freeLookCamera.GetComponent<CinemachineOrbitalFollow>();
         if (orbitalFollow == null) return;
 
-        // Calculate desired look direction from player to target
-        // Use boss's center/head position instead of their feet
-        Vector3 targetPosition = targetTransform.position + Vector3.up * 4f; // Higher offset for boss
+        
+        
+        Vector3 targetPosition = targetTransform.position + Vector3.up * 4f; 
         Vector3 targetDirection = (targetPosition - cachedPlayer.transform.position).normalized;
         
-        // Calculate desired horizontal angle (around Y axis)
+        
         float desiredHorizontalAngle = Mathf.Atan2(targetDirection.x, targetDirection.z) * Mathf.Rad2Deg;
         
-        // Calculate desired vertical angle (up/down) - FIXED: Remove the negative sign
+        
         float horizontalDistance = new Vector3(targetDirection.x, 0, targetDirection.z).magnitude;
         float desiredVerticalAngle = Mathf.Atan2(targetDirection.y, horizontalDistance) * Mathf.Rad2Deg;
 
-        // Get current orbital angles
+        
         float currentHorizontal = orbitalFollow.HorizontalAxis.Value;
         float currentVertical = orbitalFollow.VerticalAxis.Value;
 
-        // Calculate differences
+        
         float horizontalDiff = Mathf.DeltaAngle(currentHorizontal, desiredHorizontalAngle);
         float verticalDiff = Mathf.DeltaAngle(currentVertical, desiredVerticalAngle);
 
-        // Apply smooth influence
+        
         if (Mathf.Abs(horizontalDiff) > 0.5f)
         {
             float horizontalInfluence = Mathf.Sign(horizontalDiff) * Mathf.Min(
@@ -320,14 +320,14 @@ public class CameraSoftLock : MonoBehaviour
 
     private void DrawDebugLines()
     {
-        // Draw angle threshold
+        
         Vector3 leftDir = Quaternion.Euler(0, -lockAngleThreshold, 0) * transform.forward;
         Vector3 rightDir = Quaternion.Euler(0, lockAngleThreshold, 0) * transform.forward;
         
         Debug.DrawRay(transform.position, leftDir * lockRange, rangeColor);
         Debug.DrawRay(transform.position, rightDir * lockRange, rangeColor);
         
-        // Draw lines to nearby enemies
+        
         foreach (Enemy enemy in nearbyEnemies)
         {
             if (enemy != null && enemy.transform != null)
@@ -336,7 +336,7 @@ public class CameraSoftLock : MonoBehaviour
             }
         }
         
-        // Draw lines to nearby bosses
+        
         foreach (BossEnemy boss in nearbyBosses)
         {
             if (boss != null && boss.transform != null)
@@ -345,13 +345,13 @@ public class CameraSoftLock : MonoBehaviour
             }
         }
         
-        // Draw line to current target
+        
         if (currentTarget != null && currentTarget.transform != null)
         {
             Debug.DrawLine(transform.position, currentTarget.transform.position, lockColor);
         }
         
-        // Draw line to current boss target
+        
         if (currentBossTarget != null && currentBossTarget.transform != null)
         {
             Debug.DrawLine(transform.position, currentBossTarget.transform.position, Color.magenta);
@@ -362,7 +362,7 @@ public class CameraSoftLock : MonoBehaviour
     {
         if (showDebug)
         {
-            // Draw lock range (Gizmos only work here)
+            
             Gizmos.color = rangeColor;
             Gizmos.DrawWireSphere(transform.position, lockRange);
         }
@@ -372,7 +372,7 @@ public class CameraSoftLock : MonoBehaviour
     {
         if (showDebug && currentTarget != null)
         {
-            // Draw target indicator
+            
             Gizmos.color = lockColor;
             Gizmos.DrawWireSphere(currentTarget.transform.position, 0.5f);
         }

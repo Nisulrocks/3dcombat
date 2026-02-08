@@ -16,45 +16,45 @@ public class AudioEvents : MonoBehaviour
     private int lastSFXIndex = -1;
     private HashSet<int> currentlyPlayingSFX = new HashSet<int>();
 
-    // Animation event methods
+    
     public void PlaySFX(int index)
     {
-        // Safety check: only play SFX if animator is actively playing
+        
         if (animator != null && !animator.enabled)
         {
-            return; // Don't play SFX if animator is disabled
+            return; 
         }
 
-        // Overlap prevention check
+        
         if (preventOverlap && currentlyPlayingSFX.Contains(index))
         {
-            return; // Skip if this SFX is already playing
+            return; 
         }
 
-        // Check if we're in a valid animation state
+        
         if (animator != null)
         {
             AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
             
-            // For non-looping animations, skip SFX if animation has finished
+            
             if (!stateInfo.loop && stateInfo.normalizedTime >= 1.0f && !animator.IsInTransition(0))
             {
-                return; // Animation finished, not looping, skip SFX
+                return; 
             }
         }
 
-        // Simple cooldown check
+        
         if (Time.time - lastSFXTime < sfxCooldown)
         {
-            return; // Skip if SFX played too recently
+            return; 
         }
 
         AudioClip clipToPlay = null;
         
         if (useAudioManager && AudioManager.Instance != null)
         {
-            // Get clip from AudioManager (you'd need to extend AudioManager to return clips)
-            // For now, we'll use the local array as fallback
+            
+            
             if (index >= 0 && index < audioClips.Length)
             {
                 clipToPlay = audioClips[index];
@@ -67,7 +67,7 @@ public class AudioEvents : MonoBehaviour
 
         if (clipToPlay != null)
         {
-            // Play the SFX
+            
             if (useAudioManager && AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlaySFX(clipToPlay);
@@ -77,15 +77,15 @@ public class AudioEvents : MonoBehaviour
                 customAudioSource.PlayOneShot(clipToPlay);
             }
 
-            // Track this SFX as playing
+            
             if (preventOverlap)
             {
                 currentlyPlayingSFX.Add(index);
-                // Start coroutine to remove SFX from playing set when it finishes
+                
                 StartCoroutine(RemoveSFXWhenFinished(index, clipToPlay.length));
             }
 
-            // Update last played SFX info
+            
             lastSFXTime = Time.time;
             lastSFXIndex = index;
         }
@@ -99,12 +99,12 @@ public class AudioEvents : MonoBehaviour
     {
         if (useAudioManager && AudioManager.Instance != null)
         {
-            // Find clip by name in AudioManager (you'd need to extend AudioManager for this)
+            
             Debug.Log($"AudioEvents: Playing SFX by name '{clipName}' (requires AudioManager extension)");
         }
         else if (customAudioSource != null)
         {
-            // Find clip by name in local array
+            
             foreach (var clip in audioClips)
             {
                 if (clip != null && clip.name == clipName)
@@ -117,23 +117,23 @@ public class AudioEvents : MonoBehaviour
         }
     }
 
-    // Convenience methods for common SFX (using PlaySFX with specific indices)
+    
     public void PlayFootstep()
     {
-        PlaySFX(0); // Footstep at index 0
+        PlaySFX(0); 
     }
 
     public void PlayJump()
     {
-        PlaySFX(1); // Jump at index 1
+        PlaySFX(1); 
     }
 
     public void PlayDamage()
     {
-        PlaySFX(2); // Damage at index 2
+        PlaySFX(2); 
     }
 
-    // Method to play SFX with custom cooldown (useful for different animation types)
+    
     public void PlaySFXWithCooldown(int index, float customCooldown)
     {
         float originalCooldown = sfxCooldown;
@@ -142,7 +142,7 @@ public class AudioEvents : MonoBehaviour
         sfxCooldown = originalCooldown;
     }
 
-    // Method to reset SFX state (call this when stopping animations)
+    
     public void ResetSFXState()
     {
         lastSFXTime = 0f;
@@ -150,7 +150,7 @@ public class AudioEvents : MonoBehaviour
         currentlyPlayingSFX.Clear();
     }
 
-    // Method to force stop all SFX
+    
     public void StopAllSFX()
     {
         if (customAudioSource != null)
@@ -160,15 +160,15 @@ public class AudioEvents : MonoBehaviour
         
         if (useAudioManager && AudioManager.Instance != null)
         {
-            // You could extend AudioManager to have a StopAllSFX method
+            
             Debug.Log("AudioEvents: StopAllSFX called (requires AudioManager extension)");
         }
         
-        // Clear all playing SFX
+        
         currentlyPlayingSFX.Clear();
     }
 
-    // Method to manually stop a specific SFX
+    
     public void StopSFX(int index)
     {
         if (preventOverlap && currentlyPlayingSFX.Contains(index))
@@ -177,25 +177,25 @@ public class AudioEvents : MonoBehaviour
         }
     }
 
-    // Coroutine to remove SFX from playing set when it finishes
+    
     private IEnumerator RemoveSFXWhenFinished(int index, float clipLength)
     {
         yield return new WaitForSeconds(clipLength);
         
-        // Remove from playing set
+        
         if (currentlyPlayingSFX.Contains(index))
         {
             currentlyPlayingSFX.Remove(index);
         }
     }
 
-    // Debug method to check if an SFX is currently playing
+    
     public bool IsSFXPlaying(int index)
     {
         return currentlyPlayingSFX.Contains(index);
     }
 
-    // Debug method to get all currently playing SFX
+    
     public int[] GetCurrentlyPlayingSFX()
     {
         int[] playingArray = new int[currentlyPlayingSFX.Count];
@@ -203,7 +203,7 @@ public class AudioEvents : MonoBehaviour
         return playingArray;
     }
 
-    // Utility method to add clips at runtime
+    
     public void AddAudioClip(AudioClip clip)
     {
         if (clip != null)

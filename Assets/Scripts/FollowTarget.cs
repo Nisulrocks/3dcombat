@@ -27,20 +27,20 @@ public class FollowTarget : MonoBehaviour
     [Tooltip("Player tag to search for")]
     public string playerTag = "Player";
 
-    // Private variables to store the initial offset
+    
     private Vector3 initialPositionOffset;
     private Quaternion initialRotationOffset;
     private bool offsetsCalculated = false;
     private float lastCheckTime;
     
-    // Cache the original position and rotation for respawn
+    
     private Vector3 originalPosition;
     private Quaternion originalRotation;
     private bool originalPositionCached = false;
 
     void Start()
     {
-        // Cache the original position and rotation
+        
         if (!originalPositionCached)
         {
             originalPosition = transform.position;
@@ -48,7 +48,7 @@ public class FollowTarget : MonoBehaviour
             originalPositionCached = true;
         }
         
-        // Calculate offsets when the game starts
+        
         if (target != null)
         {
             CalculateOffsets();
@@ -57,7 +57,7 @@ public class FollowTarget : MonoBehaviour
 
     void LateUpdate()
     {
-        // Check if target is lost and try to find player again
+        
         if (target == null)
         {
             if (autoFindPlayer && Time.time - lastCheckTime >= checkInterval)
@@ -66,36 +66,36 @@ public class FollowTarget : MonoBehaviour
                 lastCheckTime = Time.time;
             }
             
-            // If still no target after trying, skip this frame
+            
             if (target == null)
             {
                 return;
             }
         }
 
-        // Calculate offsets if not done yet (in case target was assigned at runtime)
+        
         if (!offsetsCalculated)
         {
             CalculateOffsets();
         }
 
-        // Calculate the desired position and rotation
+        
         Vector3 targetPosition = transform.position;
         Quaternion targetRotation = transform.rotation;
 
         if (followPosition)
         {
-            // Calculate desired position: target's position + rotated offset
+            
             targetPosition = target.position + target.rotation * initialPositionOffset;
         }
 
         if (followRotation)
         {
-            // Calculate desired rotation: target's rotation * initial rotation offset
+            
             targetRotation = target.rotation * initialRotationOffset;
         }
 
-        // Apply the position and rotation (with optional smoothing)
+        
         if (smoothSpeed > 0f)
         {
             if (followPosition)
@@ -109,7 +109,7 @@ public class FollowTarget : MonoBehaviour
         }
         else
         {
-            // Instant follow
+            
             if (followPosition)
             {
                 transform.position = targetPosition;
@@ -121,33 +121,33 @@ public class FollowTarget : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Calculates the initial offset between this object and the target
-    /// </summary>
+    
+    
+    
     private void CalculateOffsets()
     {
         if (target == null) return;
 
-        // Calculate position offset in target's local space
+        
         initialPositionOffset = Quaternion.Inverse(target.rotation) * (transform.position - target.position);
 
-        // Calculate rotation offset
+        
         initialRotationOffset = Quaternion.Inverse(target.rotation) * transform.rotation;
 
         offsetsCalculated = true;
     }
 
-    /// <summary>
-    /// Recalculates the offset based on current positions (useful for runtime adjustments)
-    /// </summary>
+    
+    
+    
     public void RecalculateOffset()
     {
         CalculateOffsets();
     }
 
-    /// <summary>
-    /// Sets a new target and recalculates offsets
-    /// </summary>
+    
+    
+    
     public void SetTarget(Transform newTarget)
     {
         target = newTarget;
@@ -157,9 +157,9 @@ public class FollowTarget : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Resets this object to its original cached position and rotation
-    /// </summary>
+    
+    
+    
     public void ResetToOriginalPosition()
     {
         if (originalPositionCached)
@@ -174,9 +174,9 @@ public class FollowTarget : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Forces recalculation of offsets from current position (useful after manual position changes)
-    /// </summary>
+    
+    
+    
     public void ForceRecalculateOffsets()
     {
         if (target != null)
@@ -190,9 +190,9 @@ public class FollowTarget : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Tries to find the player GameObject when target is lost
-    /// </summary>
+    
+    
+    
     private void TryFindPlayer()
     {
         GameObject player = GameObject.FindWithTag(playerTag);
@@ -200,14 +200,14 @@ public class FollowTarget : MonoBehaviour
         {
             target = player.transform;
             
-            // If we have previously calculated offsets, keep them to maintain relative positioning
+            
             if (offsetsCalculated)
             {
                 Debug.Log($"FollowTarget: Found new player target: {player.name}, maintaining existing offsets");
             }
             else
             {
-                // If no offsets exist yet, calculate them from current position
+                
                 CalculateOffsets();
                 Debug.Log($"FollowTarget: Found new player target: {player.name}, calculated new offsets");
             }

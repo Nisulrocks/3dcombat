@@ -63,10 +63,10 @@ public class CrouchingState : State
     {
         base.LogicUpdate();
         
-        // Handle speed parameter properly - ensure it goes to 0 when not moving
+        
         float targetSpeed = input.magnitude;
         
-        // If input is very small, treat as no input (more aggressive for crouch)
+        
         if (input.magnitude < 0.05f || targetSpeed < 0.05f)
         {
             targetSpeed = 0f;
@@ -79,7 +79,7 @@ public class CrouchingState : State
             stateMachine.ChangeState(character.standing);
         }
         
-        // Check if character is falling (not grounded)
+        
         if (!character.CheckGrounded())
         {
             stateMachine.ChangeState(character.jumping);
@@ -104,7 +104,7 @@ public class CrouchingState : State
         {
             character.transform.rotation = Quaternion.Slerp(character.transform.rotation, Quaternion.LookRotation(velocity), character.rotationDampTime);
         }
-        // Force speed to 0 immediately if there's no input (for immediate SFX stop)
+        
         if (input.magnitude < 0.01f)
         {
             character.animator.SetFloat("speed", 0f);

@@ -30,7 +30,7 @@ public class IKFootPlacement : MonoBehaviour
             animator.SetIKPositionWeight(AvatarIKGoal.RightFoot, 1f);
             animator.SetIKRotationWeight(AvatarIKGoal.RightFoot, 1f);
 
-            //left foot
+            
             RaycastHit hit;
             Ray ray = new Ray(animator.GetIKPosition(AvatarIKGoal.LeftFoot) + Vector3.up, Vector3.down);
             if(Physics.Raycast(ray, out hit, DistanceToGround + 1f, layerMask)){
@@ -44,7 +44,7 @@ public class IKFootPlacement : MonoBehaviour
 
             }
 
-            //right foot 
+            
             ray = new Ray(animator.GetIKPosition(AvatarIKGoal.RightFoot) + Vector3.up, Vector3.down);
             if(Physics.Raycast(ray, out hit, DistanceToGround + 1f, layerMask)){
 

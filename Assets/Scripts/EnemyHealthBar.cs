@@ -1,15 +1,22 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class EnemyHealthBar : MonoBehaviour
 {
+    [Header("Health Bar")]
     [SerializeField] Slider slider;
     [SerializeField] Vector3 worldOffset = new Vector3(0f, 2f, 0f);
     [SerializeField] Color maxHealthColor = Color.red;
-    [SerializeField] Color midHealthColor = new Color(1f, 0.5f, 0f); // orange
+    [SerializeField] Color midHealthColor = new Color(1f, 0.5f, 0f); 
     [SerializeField] Color lowHealthColor = Color.yellow;
     [SerializeField] float midThreshold = 0.5f;
     [SerializeField] float lowThreshold = 0.25f;
+
+    [Header("Health Text")]
+    [SerializeField] TextMeshProUGUI healthText;
+    [SerializeField] bool showDecimals = false;
+    [SerializeField] string format = "{0}/{1}"; 
 
     private Enemy enemy;
     private Transform target;
@@ -47,8 +54,6 @@ public class EnemyHealthBar : MonoBehaviour
     {
         if (slider == null || enemy == null) return;
 
-        // Validate that the values match what the enemy actually has
-        // This prevents stale event data from affecting the health bar
         if (Mathf.Abs(current - enemy.CurrentHealth) > 0.01f || Mathf.Abs(max - enemy.MaxHealth) > 0.01f)
         {
             Debug.LogWarning($"EnemyHealthBar: Received stale health data. Event: {current}/{max}, Actual: {enemy.CurrentHealth}/{enemy.MaxHealth}");
@@ -59,8 +64,18 @@ public class EnemyHealthBar : MonoBehaviour
         float normalized = max <= 0f ? 0f : current / max;
         
         slider.value = normalized;
-
+        UpdateHealthText(current, max);
         UpdateFillColor(normalized);
+    }
+
+    private void UpdateHealthText(float current, float max)
+    {
+        if (healthText == null) return;
+
+        string currentText = showDecimals ? current.ToString("F1") : Mathf.Round(current).ToString();
+        string maxText = showDecimals ? max.ToString("F1") : Mathf.Round(max).ToString();
+        
+        healthText.text = string.Format(format, currentText, maxText);
     }
 
     private void UpdateFillColor(float normalized)

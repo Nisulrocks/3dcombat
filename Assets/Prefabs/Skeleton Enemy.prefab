@@ -2250,13 +2250,13 @@ MonoBehaviour:
   patrolPointReachedDist: 0.5
   returnToStartDist: 1
   obstacleDetectionRange: 5
-  avoidanceForce: 2
+  avoidanceForce: 5
   numberOfRays: 5
   raySpreadAngle: 60
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 2696
-  sideRayDistance: 1.5
+  sideRayDistance: 4
   attackSFX: {fileID: 8300000, guid: 5ac18934b39c1de4b85ade4fb8fee82c, type: 3}
   damageSFX: {fileID: 8300000, guid: 3368ff04d0da54346a6776e63a56cb2e, type: 3}
   deathSFX: {fileID: 8300000, guid: 29f15225ac7f21947909729699d680b3, type: 3}

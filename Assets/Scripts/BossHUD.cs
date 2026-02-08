@@ -36,8 +36,8 @@ public class BossHUD : MonoBehaviour
     [SerializeField] private Color fullHealthColor = Color.green;
     [SerializeField] private Color mediumHealthColor = Color.yellow;
     [SerializeField] private Color lowHealthColor = Color.red;
-    [SerializeField] private Color healingColor = new Color(0f, 0.8f, 0.2f, 0.8f); // Green with alpha
-    [SerializeField] private Color invincibleColor = new Color(0.5f, 0.5f, 0.5f, 0.8f); // Gray with alpha
+    [SerializeField] private Color healingColor = new Color(0f, 0.8f, 0.2f, 0.8f); 
+    [SerializeField] private Color invincibleColor = new Color(0.5f, 0.5f, 0.5f, 0.8f); 
     
     [Header("Settings")]
     [SerializeField] private float hudShowDistance = 50f;
@@ -52,7 +52,7 @@ public class BossHUD : MonoBehaviour
     
     private void Awake()
     {
-        // Hide HUD initially
+        
         if (hudPanel != null)
             hudPanel.SetActive(false);
     }
@@ -61,7 +61,7 @@ public class BossHUD : MonoBehaviour
     {
         player = GameObject.FindGameObjectWithTag("Player");
         
-        // Find boss enemy
+        
         bossEnemy = FindFirstObjectByType<BossEnemy>();
         if (bossEnemy == null)
         {
@@ -69,36 +69,36 @@ public class BossHUD : MonoBehaviour
             return;
         }
         
-        // Initialize sliders
+        
         InitializeSliders();
         
-        // Start update coroutine
+        
         updateCoroutine = UpdateHUDRoutine();
         StartCoroutine(updateCoroutine);
     }
     
     private void Update()
     {
-        // Check if player exists and is alive
+        
         if (player == null)
         {
-            // Player is dead/destroyed, hide panel and wait for respawn
+            
             if (hudPanel != null && hudPanel.activeSelf)
             {
                 hudPanel.SetActive(false);
             }
             StopUpdateCoroutine();
             
-            // Try to find new player (for respawn)
+            
             player = GameObject.FindGameObjectWithTag("Player");
             return;
         }
         
-        // Check if player is dead (has HealthSystem)
+        
         HealthSystem playerHealth = player.GetComponent<HealthSystem>();
         if (playerHealth != null && playerHealth.CurrentHealth <= 0)
         {
-            // Player is dead, hide panel
+            
             if (hudPanel != null && hudPanel.activeSelf)
             {
                 hudPanel.SetActive(false);
@@ -109,14 +109,14 @@ public class BossHUD : MonoBehaviour
         
         if (bossEnemy == null) return;
         
-        // Check if player is in range
+        
         float distanceToBoss = Vector3.Distance(player.transform.position, bossEnemy.transform.position);
         bool shouldShowHUD = distanceToBoss <= hudShowDistance;
         
-        // Handle range changes
+        
         if (shouldShowHUD && !isInRange)
         {
-            // Entering range
+            
             isInRange = true;
             if (hudPanel != null)
                 hudPanel.SetActive(true);
@@ -128,7 +128,7 @@ public class BossHUD : MonoBehaviour
         }
         else if (!shouldShowHUD && isInRange)
         {
-            // Leaving range
+            
             isInRange = false;
             if (hudPanel != null)
                 hudPanel.SetActive(false);
@@ -138,7 +138,7 @@ public class BossHUD : MonoBehaviour
     
     private void InitializeSliders()
     {
-        // Health slider
+        
         if (healthSlider != null)
         {
             healthSlider.minValue = 0;
@@ -146,7 +146,7 @@ public class BossHUD : MonoBehaviour
             healthSlider.value = 1;
         }
         
-        // Timer sliders (show cooldown progress)
+        
         InitializeTimerSlider(shieldCooldownSlider, shieldColor);
         InitializeTimerSlider(rageCooldownSlider, rageColor);
         InitializeTimerSlider(healCooldownSlider, healColor);
@@ -161,7 +161,7 @@ public class BossHUD : MonoBehaviour
             slider.maxValue = 1;
             slider.value = 0;
             
-            // Set slider fill color
+            
             Image sliderFill = slider.fillRect?.GetComponent<Image>();
             if (sliderFill != null)
             {
@@ -197,35 +197,35 @@ public class BossHUD : MonoBehaviour
     
     private void UpdateHUD()
     {
-        // Check if player exists and is alive
+        
         if (player == null)
         {
-            // Player is dead/destroyed, stop updates
+            
             StopUpdateCoroutine();
             return;
         }
         
-        // Check if player is dead (has HealthSystem)
+        
         HealthSystem playerHealth = player.GetComponent<HealthSystem>();
         if (playerHealth != null && playerHealth.CurrentHealth <= 0)
         {
-            // Player is dead, stop updates
+            
             StopUpdateCoroutine();
             return;
         }
         
         if (bossEnemy == null) return;
         
-        // Update health bar
+        
         UpdateHealthBar();
         
-        // Update timers
+        
         UpdateTimers();
         
-        // Update state
+        
         UpdateState();
         
-        // Update ally count
+        
         UpdateAllyCount();
     }
     
@@ -236,10 +236,10 @@ public class BossHUD : MonoBehaviour
         float healthPercent = bossEnemy.HealthPercentage;
         healthSlider.value = healthPercent;
         
-        // Update health text
+        
         if (healthText != null)
         {
-            // Check if boss has active shield
+            
             bool hasShield = bossEnemy.CurrentShield != null;
             
             if (hasShield)
@@ -253,7 +253,7 @@ public class BossHUD : MonoBehaviour
                 float maxHealth = bossEnemy.MaxHealth;
                 healthText.text = $"Health {currentHealth:F0}/{maxHealth:F0}";
                 
-                // Set color based on state
+                
                 if (bossEnemy.IsInvincible)
                 {
                     healthText.color = invincibleColor;
@@ -269,7 +269,7 @@ public class BossHUD : MonoBehaviour
             }
         }
         
-        // Update health bar color
+        
         Image healthFill = healthSlider.fillRect?.GetComponent<Image>();
         if (healthFill != null)
         {
@@ -302,16 +302,16 @@ public class BossHUD : MonoBehaviour
     {
         if (bossEnemy == null) return;
         
-        // Shield cooldown
+        
         UpdateTimer(shieldCooldownSlider, shieldCooldownText, bossEnemy.ShieldCooldownTimer, bossEnemy.ShieldCooldown, shieldColor);
         
-        // Rage cooldown
+        
         UpdateTimer(rageCooldownSlider, rageCooldownText, bossEnemy.RageCooldownTimer, bossEnemy.RageCooldown, rageColor);
         
-        // Heal cooldown
+        
         UpdateTimer(healCooldownSlider, healCooldownText, bossEnemy.HealCooldownTimer, bossEnemy.HealCooldown, healColor);
         
-        // Summon cooldown
+        
         UpdateTimer(summonCooldownSlider, summonCooldownText, bossEnemy.SummonCooldownTimer, bossEnemy.SummonCooldown, summonColor);
     }
     
@@ -389,13 +389,13 @@ public class BossHUD : MonoBehaviour
     {
         if (allyCountText == null) return;
         
-        // Clean up dead allies
+        
         summonedAllies.RemoveAll(ally => ally == null);
         
         allyCountText.text = $"Allies: {summonedAllies.Count}";
     }
     
-    // Called by BossEnemy when an ally is summoned
+    
     public void OnAllySummoned(GameObject ally)
     {
         if (ally != null)
@@ -404,7 +404,7 @@ public class BossHUD : MonoBehaviour
         }
     }
     
-    // Called by BossEnemy when an ally dies
+    
     public void OnAllyDied(GameObject ally)
     {
         if (ally != null)
@@ -413,22 +413,22 @@ public class BossHUD : MonoBehaviour
         }
     }
     
-    // Called by respawn system when player respawns
+    
     public void OnPlayerRespawn()
     {
-        // Find new player reference
+        
         player = GameObject.FindGameObjectWithTag("Player");
         
-        // Reset range state so HUD can show when player gets close again
+        
         isInRange = false;
         
         Debug.Log("BossHUD: Player respawn detected, ready to show HUD when in range");
     }
     
-    // Public properties for BossEnemy to access
+    
     public float HudShowDistance => hudShowDistance;
     
-    // Force immediate health update (used when boss dies)
+    
     public void ForceHealthUpdate(float currentHealth, float maxHealth)
     {
         if (healthSlider != null)
@@ -441,7 +441,7 @@ public class BossHUD : MonoBehaviour
             healthText.text = $"{Mathf.Round(currentHealth)}/{Mathf.Round(maxHealth)}";
         }
         
-        // Update health bar color based on final health
+        
         Image healthFill = healthSlider.fillRect?.GetComponent<Image>();
         if (healthFill != null)
         {
@@ -451,7 +451,7 @@ public class BossHUD : MonoBehaviour
         Debug.Log($"BossHUD: Force updated health to {currentHealth}/{maxHealth}");
     }
     
-    // Hide HUD after delay (used when boss dies)
+    
     public void HideAfterDelay(float delay)
     {
         StartCoroutine(HideAfterDelayCoroutine(delay));

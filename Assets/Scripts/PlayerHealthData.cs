@@ -8,9 +8,9 @@ public class PlayerHealthData : ScriptableObject
 
     [Header("Auto Healing")]
     public bool enableAutoHeal = true;
-    public float healDelay = 10f; // Time without damage before healing starts
-    public float healRate = 5f; // Health per second
-    public float healInterval = 0.5f; // How often to heal (in seconds)
+    public float healDelay = 10f; 
+    public float healRate = 5f; 
+    public float healInterval = 0.5f; 
 
     [Header("VFX")]
     public GameObject hitVFX;

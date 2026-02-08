@@ -24,25 +24,25 @@ public class RespawnUI : MonoBehaviour
 
     private void Start()
     {
-        // Setup panel color
+        
         if (backgroundPanel != null)
         {
             backgroundPanel.color = panelColor;
         }
         
-        // Hide at start
+        
         Hide();
     }
 
     public void Show()
     {
         gameObject.SetActive(true);
-        SetAlpha(1f); // Show with full alpha
+        SetAlpha(1f); 
     }
 
     public void Hide()
     {
-        SetAlpha(0f); // Hide by setting alpha to 0, but keep GameObject active
+        SetAlpha(0f); 
     }
 
     public void SetAlpha(float alpha)

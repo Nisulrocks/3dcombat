@@ -20,7 +20,7 @@ public class DamageFlashEffect : MonoBehaviour
 
     private void Awake()
     {
-        // Singleton pattern
+        
         if (Instance == null)
         {
             Instance = this;
@@ -32,30 +32,30 @@ public class DamageFlashEffect : MonoBehaviour
             return;
         }
 
-        // Get global volume if not assigned
+        
         if (globalVolume == null)
         {
             globalVolume = FindFirstObjectByType<Volume>();
         }
 
-        // Get volume profile and effects
+        
         if (globalVolume != null)
         {
             volumeProfile = globalVolume.profile;
             
-            // Get or add Vignette effect
+            
             if (!volumeProfile.TryGet(out vignetteEffect))
             {
                 vignetteEffect = volumeProfile.Add<Vignette>();
             }
             
-            // Get or add Color Adjustments for red tint
+            
             if (!volumeProfile.TryGet(out colorAdjustments))
             {
                 colorAdjustments = volumeProfile.Add<ColorAdjustments>();
             }
             
-            // Initialize effects to disabled state
+            
             vignetteEffect.intensity.overrideState = false;
             colorAdjustments.colorFilter.overrideState = false;
             
@@ -75,13 +75,13 @@ public class DamageFlashEffect : MonoBehaviour
             return;
         }
 
-        // Stop any existing flash
+        
         if (flashCoroutine != null)
         {
             StopCoroutine(flashCoroutine);
         }
 
-        // Start new flash
+        
         flashCoroutine = StartCoroutine(DamageFlashCoroutine());
     }
 
@@ -89,7 +89,7 @@ public class DamageFlashEffect : MonoBehaviour
     {
         float timer = 0f;
 
-        // Enable and configure vignette effect
+        
         vignetteEffect.intensity.overrideState = true;
         vignetteEffect.smoothness.overrideState = true;
         vignetteEffect.color.overrideState = true;
@@ -98,29 +98,29 @@ public class DamageFlashEffect : MonoBehaviour
         vignetteEffect.smoothness.value = smoothness;
         vignetteEffect.intensity.value = 0f;
 
-        // Enable red color filter
+        
         colorAdjustments.colorFilter.overrideState = true;
-        colorAdjustments.colorFilter.value = Color.white; // Start neutral
+        colorAdjustments.colorFilter.value = Color.white; 
 
         while (timer < flashDuration)
         {
             timer += Time.deltaTime;
             
-            // Calculate intensity based on curve
+            
             float normalizedTime = timer / flashDuration;
             float currentIntensity = flashCurve.Evaluate(normalizedTime) * maxIntensity;
             
-            // Apply vignette intensity
+            
             vignetteEffect.intensity.value = currentIntensity;
             
-            // Apply red color filter
+            
             Color redTint = Color.Lerp(Color.white, Color.red, currentIntensity);
             colorAdjustments.colorFilter.value = redTint;
             
             yield return null;
         }
 
-        // Reset effects
+        
         vignetteEffect.intensity.value = 0f;
         vignetteEffect.intensity.overrideState = false;
         vignetteEffect.smoothness.overrideState = false;
@@ -132,7 +132,7 @@ public class DamageFlashEffect : MonoBehaviour
         flashCoroutine = null;
     }
 
-    // Test method - call this from inspector or other scripts
+    
     [ContextMenu("Test Damage Flash")]
     public void TestDamageFlash()
     {
@@ -141,7 +141,7 @@ public class DamageFlashEffect : MonoBehaviour
 
     private void OnDestroy()
     {
-        // Clean up coroutine
+        
         if (flashCoroutine != null)
         {
             StopCoroutine(flashCoroutine);

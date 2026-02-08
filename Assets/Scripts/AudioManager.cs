@@ -25,7 +25,7 @@ public class AudioManager : MonoBehaviour
 
     private void Awake()
     {
-        // Singleton pattern
+        
         if (Instance == null)
         {
             Instance = this;
@@ -40,20 +40,20 @@ public class AudioManager : MonoBehaviour
 
     private void Start()
     {
-        // Find player and boss
+        
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
             playerTransform = player.transform;
         }
 
-        GameObject boss = GameObject.FindWithTag("Boss"); // Assuming boss has "Boss" tag
+        GameObject boss = GameObject.FindWithTag("Boss"); 
         if (boss != null)
         {
             bossTransform = boss.transform;
         }
 
-        // Start with normal BGM
+        
         if (normalBGMSource != null)
         {
             normalBGMSource.Play();
@@ -66,7 +66,7 @@ public class AudioManager : MonoBehaviour
             bossBGMSource.volume = 0f;
         }
 
-        // Start checking boss distance
+        
         StartCoroutine(CheckBossDistance());
     }
 
@@ -85,18 +85,18 @@ public class AudioManager : MonoBehaviour
                     
                     if (isBossInRange)
                     {
-                        // Switch to boss BGM
+                        
                         SwitchBGM(true);
                     }
                     else
                     {
-                        // Switch to normal BGM
+                        
                         SwitchBGM(false);
                     }
                 }
             }
 
-            yield return new WaitForSeconds(0.5f); // Check every 0.5 seconds
+            yield return new WaitForSeconds(0.5f); 
         }
     }
 
@@ -136,7 +136,7 @@ public class AudioManager : MonoBehaviour
             yield return null;
         }
 
-        // Ensure final values are set
+        
         if (normalBGMSource != null)
         {
             normalBGMSource.volume = toBoss ? 0f : normalBGMVolume;
@@ -150,7 +150,7 @@ public class AudioManager : MonoBehaviour
         bgmFadeCoroutine = null;
     }
 
-    // SFX Methods
+    
     public void PlaySFX(int index)
     {
         if (index >= 0 && index < sfxClips.Count && sfxClips[index] != null)
@@ -182,7 +182,7 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    // Utility Methods
+    
     public void AddSFXClip(AudioClip clip)
     {
         if (clip != null)
@@ -196,12 +196,12 @@ public class AudioManager : MonoBehaviour
         bossDetectionRange = range;
     }
 
-    // BGM Volume Control Methods
+    
     public void SetNormalBGMVolume(float volume)
     {
         normalBGMVolume = Mathf.Clamp01(volume);
         
-        // Update current volume if normal BGM is currently playing
+        
         if (normalBGMSource != null && !isBossInRange)
         {
             normalBGMSource.volume = normalBGMVolume;
@@ -212,7 +212,7 @@ public class AudioManager : MonoBehaviour
     {
         bossBGMVolume = Mathf.Clamp01(volume);
         
-        // Update current volume if boss BGM is currently playing
+        
         if (bossBGMSource != null && isBossInRange)
         {
             bossBGMSource.volume = bossBGMVolume;

@@ -9,7 +9,7 @@ public class ShieldColliderController : MonoBehaviour
         if (shieldCollider == null)
             shieldCollider = GetComponent<Collider>();
 
-        // Start with collider disabled
+        
         if (shieldCollider != null)
             shieldCollider.enabled = false;
     }

@@ -52,10 +52,10 @@ public class PlayerHUD : MonoBehaviour
 
     private void Update()
     {
-        // Check if player references changed (respawn)
+        
         CheckPlayerReferences();
         
-        // Update displayed values with smooth animation
+        
         UpdateSmoothValues();
     }
 
@@ -67,7 +67,7 @@ public class PlayerHUD : MonoBehaviour
             currentCharacter = character;
             currentHealthSystem = character?.GetComponent<HealthSystem>();
             
-            // Reset displayed values
+            
             if (currentHealthSystem != null)
             {
                 displayedHealth = currentHealthSystem.CurrentHealth;
@@ -80,7 +80,7 @@ public class PlayerHUD : MonoBehaviour
     {
         CheckPlayerReferences();
         
-        // Initialize sliders
+        
         if (healthSlider != null)
         {
             healthSlider.minValue = 0;
@@ -95,7 +95,7 @@ public class PlayerHUD : MonoBehaviour
             staminaSlider.value = 1;
         }
 
-        // Set initial colors
+        
         if (healthFillImage != null)
         {
             healthFillImage.color = healthColor;
@@ -111,15 +111,15 @@ public class PlayerHUD : MonoBehaviour
     {
         if (currentHealthSystem == null || currentCharacter == null) return;
 
-        // Smooth health animation
+        
         float targetHealth = currentHealthSystem.CurrentHealth / currentHealthSystem.MaxHealth;
         displayedHealth = Mathf.SmoothDamp(displayedHealth, targetHealth, ref currentHealthVelocity, smoothTime);
         
-        // Smooth stamina animation
+        
         float targetStamina = currentCharacter.GetStaminaPercentage();
         displayedStamina = Mathf.SmoothDamp(displayedStamina, targetStamina, ref currentStaminaVelocity, smoothTime);
 
-        // Update UI
+        
         UpdateHealthUI(displayedHealth);
         UpdateStaminaUI(displayedStamina);
     }
@@ -133,7 +133,7 @@ public class PlayerHUD : MonoBehaviour
 
         if (healthFillImage != null)
         {
-            // Change color based on health level
+            
             if (healthPercentage <= lowHealthThreshold)
             {
                 healthFillImage.color = lowHealthColor;
@@ -159,7 +159,7 @@ public class PlayerHUD : MonoBehaviour
 
         if (staminaFillImage != null)
         {
-            // Change color based on stamina level
+            
             if (staminaPercentage <= 0.1f)
             {
                 staminaFillImage.color = noStaminaColor;
@@ -184,7 +184,7 @@ public class PlayerHUD : MonoBehaviour
 
     public void ResetHUD()
     {
-        // Reset displayed values to max
+        
         if (currentHealthSystem != null)
         {
             displayedHealth = currentHealthSystem.MaxHealth;
@@ -209,12 +209,12 @@ public class PlayerHUD : MonoBehaviour
 
     public void ForceHealthUpdate(float currentHealth, float maxHealth)
     {
-        // Force immediate health update without smoothing
+        
         float healthPercentage = maxHealth > 0 ? currentHealth / maxHealth : 0f;
         displayedHealth = healthPercentage;
         currentHealthVelocity = 0f;
         
-        // Update UI immediately
+        
         UpdateHealthUI(healthPercentage);
     }
 

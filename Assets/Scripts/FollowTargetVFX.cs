@@ -15,7 +15,7 @@ public class FollowTargetVFX : MonoBehaviour
 
     private void Awake()
     {
-        // Store initial local transform
+        
         initialLocalPosition = transform.localPosition;
         initialLocalRotation = transform.localRotation;
     }
@@ -31,18 +31,18 @@ public class FollowTargetVFX : MonoBehaviour
         {
             if (followPosition)
             {
-                // Follow target position with offset
+                
                 transform.position = target.position + offset;
             }
 
             if (followRotation)
             {
-                // Follow target rotation
+                
                 transform.rotation = target.rotation;
             }
         }
 
-        // Auto-destroy after time
+        
         if (destroyAfterTime > 0)
         {
             timer -= Time.deltaTime;

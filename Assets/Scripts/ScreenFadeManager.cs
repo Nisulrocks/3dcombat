@@ -13,7 +13,7 @@ public class ScreenFadeManager : MonoBehaviour
 
     private void Awake()
     {
-        // Singleton pattern
+        
         if (Instance == null)
         {
             Instance = this;
@@ -25,10 +25,10 @@ public class ScreenFadeManager : MonoBehaviour
             return;
         }
 
-        // Setup fade image
+        
         if (fadeImage == null)
         {
-            // Create canvas and image if not assigned
+            
             Canvas canvas = FindFirstObjectByType<Canvas>();
             if (canvas == null)
             {
@@ -103,7 +103,7 @@ public class ScreenFadeManager : MonoBehaviour
         fadeImage.color = endColor;
     }
 
-    // Quick fade for instant effects
+    
     public void FadeToBlackInstant()
     {
         fadeImage.color = new Color(fadeColor.r, fadeColor.g, fadeColor.b, 1f);

@@ -9,7 +9,7 @@ public class SwordColliderController : MonoBehaviour
         if (swordCollider == null)
             swordCollider = GetComponent<Collider>();
 
-        // Start with collider disabled
+        
         if (swordCollider != null)
             swordCollider.enabled = false;
     }

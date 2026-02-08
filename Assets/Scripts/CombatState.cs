@@ -27,7 +27,7 @@ public class CombatState : State
         input = Vector2.zero;
         currentVelocity = Vector3.zero;
         gravityVelocity.y = 0;
-        attack = false; // Reset attack flag
+        attack = false; 
         block = false;
         superActivate = false;
         timePassed = 0f;
@@ -37,7 +37,7 @@ public class CombatState : State
         grounded = character.controller.isGrounded;
         gravityValue = character.gravityValue;
         
-        // Clear any attack input that might be carried over
+        
         attackAction.Reset();
     }
  
@@ -77,10 +77,10 @@ public class CombatState : State
     {
         base.LogicUpdate();
 
-        // Handle speed parameter properly - ensure it goes to 0 when not moving
+        
         float targetSpeed = input.magnitude;
         
-        // If input is very small, treat as no input
+        
         if (targetSpeed < 0.1f)
         {
             targetSpeed = 0f;
@@ -91,10 +91,10 @@ public class CombatState : State
         if (sheathWeapon)
         {
             character.animator.SetTrigger("sheathWeapon");
-            // Only change state after sheathing animation starts
-            // The actual state change should be handled by animation events or a timer
-            // For now, add a small delay to prevent immediate state change
-            if (timePassed > 0.1f) // Small delay to ensure animation starts
+            
+            
+            
+            if (timePassed > 0.1f) 
             {
                 stateMachine.ChangeState(character.standing);
             }
@@ -102,16 +102,16 @@ public class CombatState : State
 
         if (attack)
         {
-            // Check if shield is active - if so, prevent attack
+            
             ShieldSystem shieldSystem = character.GetComponent<ShieldSystem>();
             if (shieldSystem != null && shieldSystem.CurrentShield != null)
             {
-                // Shield is active, don't allow attack
+                
                 attack = false;
                 return;
             }
 
-            // Check if super is active - trigger super attack instead
+            
             if (SuperSystem.Instance != null && SuperSystem.Instance.IsSuperActive)
             {
                 stateMachine.ChangeState(character.superAttacking);
@@ -125,23 +125,23 @@ public class CombatState : State
 
         if (block)
         {
-            // Check if shield system can block
+            
             ShieldSystem shieldSystem = character.GetComponent<ShieldSystem>();
             if (shieldSystem != null && shieldSystem.CanBlock)
             {
                 character.animator.SetTrigger("block");
-                // Block is handled in the same state, no state change needed
-                // The animation will handle showing/hiding the shield
+                
+                
             }
-            block = false; // Reset block flag
+            block = false; 
         }
 
-        // Handle super activation
+        
         if (superActivate)
         {
             if (SuperSystem.Instance != null && SuperSystem.Instance.IsSuperReady)
             {
-                // Activate super mode
+                
                 SuperSystem.Instance.TryActivateSuper();
             }
             superActivate = false;
@@ -170,7 +170,7 @@ public class CombatState : State
             character.transform.rotation = Quaternion.Slerp(character.transform.rotation, Quaternion.LookRotation(velocity), character.rotationDampTime);
         }
         
-        // Force speed to 0 immediately if there's no input (for immediate SFX stop)
+        
         if (input.magnitude < 0.01f)
         {
             character.animator.SetFloat("speed", 0f);
@@ -184,7 +184,7 @@ public class CombatState : State
         gravityVelocity.y = 0f;
         character.playerVelocity = new Vector3(input.x, 0, input.y);
         
-        // Reset speed parameter to 0 when exiting state
+        
         character.animator.SetFloat("speed", 0f);
 
         if (velocity.sqrMagnitude > 0)

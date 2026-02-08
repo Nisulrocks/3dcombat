@@ -41,7 +41,7 @@ public class SprintState : State
         velocity = velocity.x * character.cameraTransform.right.normalized + velocity.z * character.cameraTransform.forward.normalized;
         velocity.y = 0f;
         
-        // Check if can continue sprinting
+        
         if (!character.CanSprint() || input.sqrMagnitude == 0f)
         {
             sprint = false;
@@ -73,7 +73,7 @@ public class SprintState : State
             stateMachine.ChangeState(character.sprintjumping);
         }
         
-        // Check if character is falling (not grounded)
+        
         if (!character.CheckGrounded())
         {
             stateMachine.ChangeState(character.jumping);

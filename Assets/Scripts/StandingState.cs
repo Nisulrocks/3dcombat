@@ -12,7 +12,7 @@ public class StandingState: State
     float playerSpeed;
     bool drawWeapon;
     #pragma warning disable CS0414
-    float timePassed; // Add timer for animation sequencing
+    float timePassed; 
     #pragma warning restore CS0414
 
     Vector3 cVelocity;
@@ -32,7 +32,7 @@ public class StandingState: State
         sprint = false;
         drawWeapon = false;
         input = Vector2.zero;
-        timePassed = 0f; // Initialize timer
+        timePassed = 0f; 
         
         currentVelocity = Vector3.zero;
         gravityVelocity.y = 0;
@@ -42,7 +42,7 @@ public class StandingState: State
         grounded = character.controller.isGrounded;
         gravityValue = character.gravityValue;    
         
-        // Set speed parameter to current movement speed
+        
         character.animator.SetFloat("speed", velocity.magnitude);    
     }
  
@@ -80,10 +80,10 @@ public class StandingState: State
     {
         base.LogicUpdate();
  
-        // Handle speed parameter properly - ensure it goes to 0 when not moving
+        
         float targetSpeed = input.magnitude;
         
-        // If input is very small, treat as no input
+        
         if (targetSpeed < 0.1f)
         {
             targetSpeed = 0f;
@@ -91,7 +91,7 @@ public class StandingState: State
         
         character.animator.SetFloat("speed", targetSpeed, character.speedDampTime, Time.deltaTime);
 
-        // Check for ladder and transition to climbing
+        
         if (ClimbingState.CanStartClimbing(character) && input.y > 0.1f)
         {
             stateMachine.ChangeState(character.climbing);
@@ -112,15 +112,15 @@ public class StandingState: State
         }
         if (drawWeapon)
         {
-            // Change to combat state first
+            
             stateMachine.ChangeState(character.combatting);
             
-            // Then trigger draw weapon animation in the next frame
-            // This ensures we're properly in the combat state before the animation
+            
+            
             character.StartCoroutine(DrawWeaponNextFrame());
         }
         
-        // Check if character is falling (not grounded)
+        
         if (!character.CheckGrounded())
         {
             stateMachine.ChangeState(character.jumping);
@@ -147,7 +147,7 @@ public class StandingState: State
             character.transform.rotation = Quaternion.Slerp(character.transform.rotation, Quaternion.LookRotation(velocity),character.rotationDampTime);
         }
         
-        // Force speed to 0 immediately if there's no input (for immediate SFX stop)
+        
         if (input.magnitude < 0.01f)
         {
             character.animator.SetFloat("speed", 0f);
@@ -161,7 +161,7 @@ public class StandingState: State
         gravityVelocity.y = 0f;
         character.playerVelocity = new Vector3(input.x, 0, input.y);
         
-        // Reset speed parameter to 0 when exiting state
+        
         character.animator.SetFloat("speed", 0f);
 
         if (velocity.sqrMagnitude > 0)
@@ -172,10 +172,10 @@ public class StandingState: State
 
     private IEnumerator DrawWeaponNextFrame()
     {
-        // Wait one frame to ensure state change is processed
+        
         yield return null;
         
-        // Now trigger the draw weapon animation
+        
         if (character.animator != null)
         {
             character.animator.SetTrigger("drawWeapon");

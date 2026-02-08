@@ -21,10 +21,10 @@ public class AttackState : State
         character.animator.SetTrigger("attack");
         character.animator.SetFloat("speed", 0f);
         
-        // Start combo window with animation duration
+        
         if (ComboManager.Instance != null)
         {
-            // Get attack animation clip duration
+            
             AnimatorClipInfo[] clipInfos = character.animator.GetCurrentAnimatorClipInfo(1);
             if (clipInfos.Length > 0)
             {
@@ -52,7 +52,7 @@ public class AttackState : State
  
         timePassed += Time.deltaTime;
         
-        // Safely get clip info
+        
         AnimatorClipInfo[] clipInfos = character.animator.GetCurrentAnimatorClipInfo(1);
         if (clipInfos.Length > 0)
         {
@@ -71,8 +71,8 @@ public class AttackState : State
         }
         else
         {
-            // Fallback if no clip info is available
-            if (timePassed >= 1f) // Default attack duration
+            
+            if (timePassed >= 1f) 
             {
                 stateMachine.ChangeState(character.combatting);
                 character.animator.SetTrigger("move");
@@ -84,7 +84,7 @@ public class AttackState : State
         base.Exit();
         character.animator.applyRootMotion = false;
         
-        // End combo window when attack animation ends
+        
         if (ComboManager.Instance != null)
         {
             ComboManager.Instance.EndComboWindow();

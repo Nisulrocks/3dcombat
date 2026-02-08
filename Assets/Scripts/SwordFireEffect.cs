@@ -6,7 +6,7 @@ public class SwordFireEffect : MonoBehaviour
 
     private void Start()
     {
-        // Start playing the fire particle when this prefab is spawned
+        
         if (fireParticle != null)
         {
             fireParticle.Play();
@@ -15,7 +15,7 @@ public class SwordFireEffect : MonoBehaviour
 
     private void OnDisable()
     {
-        // Stop fire when disabled
+        
         if (fireParticle != null)
         {
             fireParticle.Stop();

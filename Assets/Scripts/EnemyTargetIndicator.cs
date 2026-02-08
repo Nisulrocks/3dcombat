@@ -11,10 +11,10 @@ public class EnemyTargetIndicator : MonoBehaviour
     [SerializeField] float indicatorSize = 50f;
     [SerializeField] float edgeOffset = 50f;
     [SerializeField] float targetHeightOffset = 1.5f;
-    [SerializeField] float bossHeightOffset = 3f; // Higher offset for boss
+    [SerializeField] float bossHeightOffset = 3f; 
     [SerializeField] Color targetColor = Color.red;
     [SerializeField] Color lockColor = Color.yellow;
-    [SerializeField] Color bossColor = Color.magenta; // Different color for boss
+    [SerializeField] Color bossColor = Color.magenta; 
 
     private Camera mainCamera;
     private Enemy currentTarget;
@@ -43,10 +43,10 @@ public class EnemyTargetIndicator : MonoBehaviour
             Enemy newTarget = CameraSoftLock.Instance.GetCurrentTarget();
             BossEnemy newBossTarget = CameraSoftLock.Instance.GetCurrentBossTarget();
             
-            // Check if target changed
+            
             if (newTarget != currentTarget || newBossTarget != currentBossTarget)
             {
-                // Unsubscribe from old target's death event
+                
                 if (currentTarget != null)
                 {
                     currentTarget.OnDied -= HandleTargetDied;
@@ -59,13 +59,13 @@ public class EnemyTargetIndicator : MonoBehaviour
                 {
                     targetIndicator.gameObject.SetActive(true);
                     targetIndicator.color = CameraSoftLock.Instance.IsInCombat() ? lockColor : targetColor;
-                    // Subscribe to new target's death event
+                    
                     currentTarget.OnDied += HandleTargetDied;
                 }
                 else if (currentBossTarget != null)
                 {
                     targetIndicator.gameObject.SetActive(true);
-                    targetIndicator.color = bossColor; // Boss gets special color
+                    targetIndicator.color = bossColor; 
                 }
                 else
                 {
@@ -73,7 +73,7 @@ public class EnemyTargetIndicator : MonoBehaviour
                 }
             }
 
-            // Update indicator position
+            
             if ((currentTarget != null || currentBossTarget != null) && targetIndicator != null)
             {
                 UpdateIndicatorPosition();
@@ -81,7 +81,7 @@ public class EnemyTargetIndicator : MonoBehaviour
         }
         else
         {
-            // Hide if no soft lock system
+            
             if (targetIndicator != null)
             {
                 targetIndicator.gameObject.SetActive(false);
@@ -91,7 +91,7 @@ public class EnemyTargetIndicator : MonoBehaviour
 
     private void HandleTargetDied()
     {
-        // Clear target and hide indicator when enemy dies
+        
         currentTarget = null;
         currentBossTarget = null;
         if (targetIndicator != null)
@@ -104,34 +104,34 @@ public class EnemyTargetIndicator : MonoBehaviour
     {
         if (currentTarget == null && currentBossTarget == null || mainCamera == null) return;
 
-        // Determine target and height offset
+        
         Transform targetTransform = currentTarget != null ? currentTarget.transform : currentBossTarget.transform;
         float heightOffset = currentTarget != null ? targetHeightOffset : bossHeightOffset;
 
-        // Apply height offset to target's upper body/head
+        
         Vector3 targetPosition = targetTransform.position + Vector3.up * heightOffset;
         Vector3 screenPosition = mainCamera.WorldToScreenPoint(targetPosition);
 
-        // Check if target is on screen
+        
         if (screenPosition.z > 0 && 
             screenPosition.x >= 0 && screenPosition.x <= Screen.width &&
             screenPosition.y >= 0 && screenPosition.y <= Screen.height)
         {
-            // Target is on screen - position indicator at target
+            
             targetIndicator.transform.position = screenPosition;
             targetIndicator.rectTransform.sizeDelta = Vector2.one * indicatorSize;
         }
         else
         {
-            // Target is off screen - show edge indicator
+            
             Vector3 screenCenter = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0);
             Vector3 toTarget = screenPosition - screenCenter;
             
-            // Normalize and clamp to screen edges
+            
             toTarget.z = 0;
             toTarget.Normalize();
             
-            // Calculate edge position
+            
             float screenWidth = Screen.width * 0.5f - edgeOffset;
             float screenHeight = Screen.height * 0.5f - edgeOffset;
             
@@ -142,7 +142,7 @@ public class EnemyTargetIndicator : MonoBehaviour
             
             if (Mathf.Abs(toTarget.x) > Mathf.Abs(toTarget.y))
             {
-                // Horizontal edge
+                
                 edgePosition = new Vector3(
                     Mathf.Sign(toTarget.x) * screenWidth,
                     toTarget.y * screenWidth / Mathf.Abs(toTarget.x),
@@ -151,7 +151,7 @@ public class EnemyTargetIndicator : MonoBehaviour
             }
             else
             {
-                // Vertical edge
+                
                 edgePosition = new Vector3(
                     toTarget.x * screenHeight / Mathf.Abs(toTarget.y),
                     Mathf.Sign(toTarget.y) * screenHeight,
@@ -159,28 +159,28 @@ public class EnemyTargetIndicator : MonoBehaviour
                 );
             }
             
-            // Convert to screen coordinates
+            
             screenPosition = screenCenter + edgePosition;
             targetIndicator.transform.position = screenPosition;
             
-            // Rotate indicator to point to target
+            
             float rotation = Mathf.Atan2(toTarget.y, toTarget.x) * Mathf.Rad2Deg - 90f;
             targetIndicator.transform.rotation = Quaternion.Euler(0, 0, rotation);
             
-            // Make indicator smaller when off-screen
+            
             targetIndicator.rectTransform.sizeDelta = Vector2.one * (indicatorSize * 0.7f);
         }
     }
 
     private void OnDestroy()
     {
-        // Clean up event subscriptions
+        
         if (currentTarget != null)
         {
             currentTarget.OnDied -= HandleTargetDied;
         }
         
-        // Clear boss target reference
+        
         currentBossTarget = null;
     }
 }

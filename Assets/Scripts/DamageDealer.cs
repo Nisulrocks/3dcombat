@@ -24,12 +24,12 @@ public class DamageDealer : MonoBehaviour
             int layerMask = 1 << 9;
             if (Physics.Raycast(transform.position, -transform.up, out hit, weaponLength, layerMask))
             {
-                // Check for regular Enemy
+                
                 if (hit.transform.TryGetComponent(out Enemy enemy) && !hasDealtDamage.Contains(hit.transform.gameObject))
                 {
                     DealDamageToEnemy(enemy, hit);
                 }
-                // Check for BossEnemy
+                
                 else if (hit.transform.TryGetComponent(out BossEnemy bossEnemy) && !hasDealtDamage.Contains(hit.transform.gameObject))
                 {
                     DealDamageToBoss(bossEnemy, hit);
@@ -40,10 +40,10 @@ public class DamageDealer : MonoBehaviour
 
     void DealDamageToEnemy(Enemy enemy, RaycastHit hit)
     {
-        // Check if super is active
+        
         bool isSuperActive = SuperSystem.Instance != null && SuperSystem.Instance.IsSuperActive;
         
-        // Calculate damage with combo multiplier
+        
         float comboMultiplier = 1f;
         int comboLevel = 0;
         if (ComboManager.Instance != null && !isSuperActive)
@@ -53,7 +53,7 @@ public class DamageDealer : MonoBehaviour
             ComboManager.Instance.RegisterHit();
         }
         
-        // Apply super damage multiplier if active
+        
         float superMultiplier = 1f;
         if (isSuperActive && SuperSystem.Instance != null)
         {
@@ -65,7 +65,7 @@ public class DamageDealer : MonoBehaviour
         enemy.HitVFX(hit.point);
         hasDealtDamage.Add(hit.transform.gameObject);
         
-        // Spawn damage text at hit position
+        
         if (isSuperActive)
         {
             DamageText.CreateSuperDamageText(hit.point, finalDamage);
@@ -75,19 +75,19 @@ public class DamageDealer : MonoBehaviour
             DamageText.CreateDamageText(hit.point, finalDamage, comboLevel);
         }
         
-        // Add super charge on hit (only if not in super mode)
+        
         if (!isSuperActive && SuperSystem.Instance != null)
         {
             SuperSystem.Instance.AddChargeFromHit();
         }
         
-        // Trigger time stop effect (only for normal attacks, super has its own time control)
+        
         if (!isSuperActive && TimeStopManager.Instance != null)
         {
             TimeStopManager.Instance.StopTime();
         }
         
-        // Trigger chromatic aberration effect on successful hit
+        
         if (HitChromaticEffect.Instance != null)
         {
             HitChromaticEffect.Instance.TriggerHitChromatic();
@@ -98,10 +98,10 @@ public class DamageDealer : MonoBehaviour
 
     void DealDamageToBoss(BossEnemy bossEnemy, RaycastHit hit)
     {
-        // Check if super is active
+        
         bool isSuperActive = SuperSystem.Instance != null && SuperSystem.Instance.IsSuperActive;
         
-        // Calculate damage with combo multiplier
+        
         float comboMultiplier = 1f;
         int comboLevel = 0;
         if (ComboManager.Instance != null && !isSuperActive)
@@ -111,7 +111,7 @@ public class DamageDealer : MonoBehaviour
             ComboManager.Instance.RegisterHit();
         }
         
-        // Apply super damage multiplier if active
+        
         float superMultiplier = 1f;
         if (isSuperActive && SuperSystem.Instance != null)
         {
@@ -122,7 +122,7 @@ public class DamageDealer : MonoBehaviour
         bossEnemy.TakeDamage(finalDamage);
         hasDealtDamage.Add(hit.transform.gameObject);
         
-        // Spawn damage text at hit position
+        
         if (isSuperActive)
         {
             DamageText.CreateSuperDamageText(hit.point, finalDamage);
@@ -132,19 +132,19 @@ public class DamageDealer : MonoBehaviour
             DamageText.CreateDamageText(hit.point, finalDamage, comboLevel);
         }
         
-        // Add super charge on hit (only if not in super mode)
+        
         if (!isSuperActive && SuperSystem.Instance != null)
         {
             SuperSystem.Instance.AddChargeFromHit();
         }
         
-        // Trigger time stop effect
+        
         if (!isSuperActive && TimeStopManager.Instance != null)
         {
             TimeStopManager.Instance.StopTime();
         }
         
-        // Trigger chromatic aberration effect on successful hit
+        
         if (HitChromaticEffect.Instance != null)
         {
             HitChromaticEffect.Instance.TriggerHitChromatic();

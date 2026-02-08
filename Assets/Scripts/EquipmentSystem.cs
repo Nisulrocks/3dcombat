@@ -15,7 +15,7 @@ public class EquipmentSystem : MonoBehaviour
 
     public GameObject CurrentWeapon => currentWeaponInHand;
 
-    // Returns true if weapon is currently drawn (in hand)
+    
     public bool IsWeaponDrawn => currentWeaponInHand != null;
 
     void Start()
@@ -25,14 +25,14 @@ public class EquipmentSystem : MonoBehaviour
 
     public void DrawWeapon()
     {
-        // Prevent duplicate weapons - only draw if not already in hand
+        
         if (currentWeaponInHand != null)
         {
             Debug.Log("EquipmentSystem: Weapon already in hand, skipping draw");
             return;
         }
 
-        // Destroy sheath weapon first
+        
         if (currentWeaponInSheath != null)
         {
             Destroy(currentWeaponInSheath);
@@ -41,7 +41,7 @@ public class EquipmentSystem : MonoBehaviour
 
         currentWeaponInHand = Instantiate(weapon, weaponHolder.transform);
 
-        // Refresh sword fire VFX if super is active
+        
         if (SuperSystem.Instance != null)
         {
             SuperSystem.Instance.RefreshSwordFire();
@@ -50,14 +50,14 @@ public class EquipmentSystem : MonoBehaviour
 
     public void SheathWeapon()
     {
-        // Prevent duplicate weapons - only sheath if not already in sheath
+        
         if (currentWeaponInSheath != null)
         {
             Debug.Log("EquipmentSystem: Weapon already in sheath, skipping sheath");
             return;
         }
 
-        // Destroy hand weapon first
+        
         if (currentWeaponInHand != null)
         {
             Destroy(currentWeaponInHand);
@@ -71,7 +71,7 @@ public class EquipmentSystem : MonoBehaviour
     {
         if (currentWeaponInHand != null)
         {
-            // Player damage dealer (damages enemies)
+            
             DamageDealer damageDealer = currentWeaponInHand.GetComponentInChildren<DamageDealer>();
             if (damageDealer != null)
             {
@@ -90,7 +90,7 @@ public class EquipmentSystem : MonoBehaviour
     {
         if (currentWeaponInHand != null)
         {
-            // Player damage dealer
+            
             DamageDealer damageDealer = currentWeaponInHand.GetComponentInChildren<DamageDealer>();
             if (damageDealer != null)
             {
@@ -115,7 +115,7 @@ public class EquipmentSystem : MonoBehaviour
 
     public void EndBlock()
     {
-        // No longer needed - ShieldSystem handles auto-deactivation
-        // Kept for compatibility but doesn't do anything
+        
+        
     }
 }

@@ -10,7 +10,7 @@ public class ShieldSystem : MonoBehaviour
     [SerializeField] float shieldCooldown = 3f;
 
     GameObject currentShield;
-    public GameObject CurrentShield => currentShield; // Public getter for external access
+    public GameObject CurrentShield => currentShield; 
     private bool isOnCooldown = false;
     private Coroutine shieldCoroutine;
     private Coroutine cooldownCoroutine;
@@ -36,14 +36,14 @@ public class ShieldSystem : MonoBehaviour
         {
             currentShield = Instantiate(shieldPrefab, shieldHolder.transform);
             
-            // Enable shield collider if it has one
+            
             ShieldColliderController colliderController = currentShield.GetComponentInChildren<ShieldColliderController>();
             if (colliderController != null)
             {
                 colliderController.StartBlock();
             }
 
-            // Start auto-deactivate timer
+            
             if (shieldCoroutine != null)
                 StopCoroutine(shieldCoroutine);
             shieldCoroutine = StartCoroutine(ShieldDurationCoroutine());
@@ -54,7 +54,7 @@ public class ShieldSystem : MonoBehaviour
     {
         if (currentShield != null)
         {
-            // Disable shield collider before destroying
+            
             ShieldColliderController colliderController = currentShield.GetComponentInChildren<ShieldColliderController>();
             if (colliderController != null)
             {
@@ -65,20 +65,20 @@ public class ShieldSystem : MonoBehaviour
             currentShield = null;
         }
 
-        // Stop duration coroutine if running
+        
         if (shieldCoroutine != null)
         {
             StopCoroutine(shieldCoroutine);
             shieldCoroutine = null;
         }
 
-        // Trigger move animation to return to locomotion idle
+        
         if (animator != null)
         {
             animator.SetTrigger("move");
         }
 
-        // Start cooldown
+        
         StartCooldown();
     }
 
@@ -106,14 +106,14 @@ public class ShieldSystem : MonoBehaviour
 
     private void OnDestroy()
     {
-        // Clean up shield if it exists
+        
         if (currentShield != null)
         {
             Destroy(currentShield);
             currentShield = null;
         }
 
-        // Stop coroutines safely
+        
         if (shieldCoroutine != null)
         {
             StopCoroutine(shieldCoroutine);
@@ -127,10 +127,10 @@ public class ShieldSystem : MonoBehaviour
         }
     }
 
-    // For UI or debugging
+    
     public float GetCooldownProgress()
     {
         if (!isOnCooldown) return 1f;
-        return 0f; // Could implement actual progress tracking if needed
+        return 0f; 
     }
 }

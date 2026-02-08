@@ -1,8 +1,8 @@
 using UnityEngine;
 
-/// <summary>
-/// Represents a single respawn point with a name and transform
-/// </summary>
+
+
+
 [System.Serializable]
 public class RespawnPoint
 {

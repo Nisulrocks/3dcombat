@@ -18,7 +18,7 @@ public class EnemyHealthBarSpawner : MonoBehaviour
 
         int enemyID = enemy.GetInstanceID();
 
-        // Prevent multiple health bars for the same enemy
+        
         if (trackedEnemyIDs.Contains(enemyID) || hasSpawned)
         {
             Debug.LogWarning($"EnemyHealthBarSpawner: Enemy {enemyID} already has a health bar", this);
@@ -69,7 +69,7 @@ public class EnemyHealthBarSpawner : MonoBehaviour
             spawned = null;
         }
 
-        // Remove enemy from tracked set
+        
         Enemy enemy = GetComponent<Enemy>();
         if (enemy != null)
         {
@@ -77,7 +77,7 @@ public class EnemyHealthBarSpawner : MonoBehaviour
         }
     }
 
-    // Clear static data when scene loads (prevents issues across scene loads)
+    
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ClearStaticData()
     {

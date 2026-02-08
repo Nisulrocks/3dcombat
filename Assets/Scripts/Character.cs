@@ -24,9 +24,9 @@ public class Character : MonoBehaviour
     [Header("Stamina System")]
     [SerializeField] private float maxStamina = 100f;
     [SerializeField] private float currentStamina;
-    [SerializeField] private float staminaDrainRate = 20f; // Per second while sprinting
-    [SerializeField] private float staminaRegenRate = 10f; // Per second while not sprinting
-    [SerializeField] private float staminaRegenDelay = 1f; // Delay before regen starts
+    [SerializeField] private float staminaDrainRate = 20f; 
+    [SerializeField] private float staminaRegenRate = 10f; 
+    [SerializeField] private float staminaRegenDelay = 1f; 
     private float lastSprintTime;
     private bool canSprint = true;
 
@@ -40,7 +40,7 @@ public class Character : MonoBehaviour
     public float climbSpeed = 3f;
     public LayerMask ladderLayer;
     public float ladderDetectionDistance = 1f;
-    public LayerMask groundLayer; // Used for platform detection when climbing
+    public LayerMask groundLayer; 
  
     public StateMachine movementSM;
     public StandingState standing;
@@ -70,7 +70,7 @@ public class Character : MonoBehaviour
     public Vector3 playerVelocity;
  
  
-    // Start is called before the first frame update
+    
     private void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -78,7 +78,7 @@ public class Character : MonoBehaviour
         playerInput = GetComponent<PlayerInput>();
         cameraTransform = Camera.main.transform;
 
-        // Lock cursor to game window
+        
         LockCursor();
 
         movementSM = new StateMachine();
@@ -98,14 +98,14 @@ public class Character : MonoBehaviour
         normalColliderHeight = controller.height;
         gravityValue *= gravityMultiplier;
         
-        // Initialize stamina
+        
         currentStamina = maxStamina;
         
-        // Reset climbing state for new player
+        
         ResetClimbingState();
     }
     
-    // Reset climbing state (called on respawn)
+    
     public void ResetClimbingState()
     {
         if (climbing != null)
@@ -126,7 +126,7 @@ public class Character : MonoBehaviour
         Cursor.visible = true;
     }
 
-    // Handle cursor locking when application loses/gains focus
+    
     private void OnApplicationFocus(bool hasFocus)
     {
         if (hasFocus)
@@ -144,7 +144,7 @@ public class Character : MonoBehaviour
         movementSM.currentState.HandleInput();
         movementSM.currentState.LogicUpdate();
         
-        // Update stamina
+        
         UpdateStamina();
     }
  
@@ -161,12 +161,12 @@ public class Character : MonoBehaviour
 
     private void UpdateStamina()
     {
-        // Check if currently sprinting
+        
         bool isSprinting = movementSM.currentState == sprinting || movementSM.currentState == sprintjumping;
         
         if (isSprinting && currentStamina > 0)
         {
-            // Drain stamina while sprinting
+            
             currentStamina = Mathf.Max(0, currentStamina - staminaDrainRate * Time.deltaTime);
             lastSprintTime = Time.time;
             
@@ -177,10 +177,10 @@ public class Character : MonoBehaviour
         }
         else if (!isSprinting && Time.time - lastSprintTime >= staminaRegenDelay)
         {
-            // Regenerate stamina after delay
+            
             currentStamina = Mathf.Min(maxStamina, currentStamina + staminaRegenRate * Time.deltaTime);
             
-            if (currentStamina >= maxStamina * 0.2f) // Allow sprinting when at least 20% stamina
+            if (currentStamina >= maxStamina * 0.2f) 
             {
                 canSprint = true;
             }

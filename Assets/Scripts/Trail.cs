@@ -10,7 +10,7 @@ public class Trail : MonoBehaviour
     public Transform positionToSpawn;
 
     [Header("Shader Settings")]
-    public Material[] trailMaterials; // Array of materials to choose from
+    public Material[] trailMaterials; 
     public float rate = 0.1f;
     public float refreshRate = 0.05f;
     public string shaderVarRef;
@@ -19,21 +19,21 @@ public class Trail : MonoBehaviour
     private bool isTrailActive;
     private SkinnedMeshRenderer[] skinnedMeshRenderers;
     public float DestroyTime = 2f;
-    private int currentMaterialIndex = 0; // Store current material index
+    private int currentMaterialIndex = 0; 
 
-    // Animation event methods
+    
     public void StartMeshTrail(int materialIndex)
     {
         if (!isTrailActive)
         {
-            // Validate material index
+            
             if (trailMaterials == null || trailMaterials.Length == 0)
             {
                 Debug.LogError("Trail: No materials assigned to trailMaterials array!");
                 return;
             }
             
-            // Clamp index to valid range
+            
             currentMaterialIndex = Mathf.Clamp(materialIndex, 0, trailMaterials.Length - 1);
             
             isTrailActive = true;
@@ -41,10 +41,10 @@ public class Trail : MonoBehaviour
         }
     }
 
-    // Overload method without parameter for backward compatibility
+    
     public void StartMeshTrail()
     {
-        StartMeshTrail(0); // Default to first material
+        StartMeshTrail(0); 
     }
 
     public void EndMeshTrail()
@@ -52,13 +52,13 @@ public class Trail : MonoBehaviour
         isTrailActive = false;
     }
 
-    // Helper method to get the number of available materials
+    
     public int GetMaterialCount()
     {
         return trailMaterials != null ? trailMaterials.Length : 0;
     }
 
-    // Helper method to validate material setup
+    
     public bool ValidateMaterials()
     {
         if (trailMaterials == null || trailMaterials.Length == 0)
@@ -81,7 +81,7 @@ public class Trail : MonoBehaviour
 
     IEnumerator ActiveTrail(float timeActive)
     {
-        // Initialize skinned mesh renderers once
+        
         if(skinnedMeshRenderers == null)
         {
             skinnedMeshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
@@ -91,7 +91,7 @@ public class Trail : MonoBehaviour
         {
             timeActive -= meshRefreshRate;
 
-            // Create mesh trail every frame
+            
             for(int i = 0; i < skinnedMeshRenderers.Length; i++)
             {
                 GameObject gObj = new GameObject();
@@ -104,7 +104,7 @@ public class Trail : MonoBehaviour
                 skinnedMeshRenderers[i].BakeMesh(mesh);
                 meshFilter.mesh = mesh;
 
-                // Use material from array based on current index
+                
                 meshRenderer.material = trailMaterials[currentMaterialIndex];
 
                 StartCoroutine(AnimateMaterialFloat(meshRenderer.material, 0f, rate, refreshRate));
